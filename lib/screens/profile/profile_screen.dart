@@ -130,10 +130,10 @@ class _StatsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
+        const Card(
+          margin: EdgeInsets.symmetric(horizontal: 16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -218,7 +218,7 @@ class _AchievementsSection extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
+            children: const [
               _AchievementItem(
                 icon: Icons.emoji_events,
                 title: 'First Chat',

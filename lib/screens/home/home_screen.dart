@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/chat/ai_chat_screen.dart';
 import 'package:easy_talk/screens/profile/profile_screen.dart';
 import 'package:easy_talk/screens/settings/settings_screen.dart';
+import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -211,7 +212,22 @@ class _LanguageCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to language detail screen
+          if (language.name == 'English' || language.name == 'Spanish') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LanguageCoursesScreen(language: language.name),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${language.name} courses coming soon!'),
+                duration: const Duration(seconds: 2),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

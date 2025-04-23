@@ -18,8 +18,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar.large(
-            title: const Text('Settings'),
+          const SliverAppBar.large(
+            title: Text('Settings'),
           ),
           SliverToBoxAdapter(
             child: Column(
@@ -127,10 +127,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSection(
                   title: 'About',
                   children: [
-                    ListTile(
-                      leading: const Icon(Icons.info_outline),
-                      title: const Text('Version'),
-                      trailing: const Text('1.0.0'),
+                    const ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: Text('Version'),
+                      trailing: Text('1.0.0'),
                     ),
                     ListTile(
                       leading: const Icon(Icons.description_outlined),

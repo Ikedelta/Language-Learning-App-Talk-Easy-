@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/splash/splash_screen.dart';
+import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
+import 'package:easy_talk/screens/auth/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +20,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const SplashScreen(),
-git init    );
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/language-courses': (context) => const LanguageCoursesScreen(language: 'English'),
+      },
+    );
   }
 }
 

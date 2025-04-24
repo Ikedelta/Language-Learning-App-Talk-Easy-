@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:audioplayers_platform_interface/audioplayers_platform_interface.dart';
+import 'package:audioplayers/audioplayers.dart' as audio;
 import '../../models/language_course.dart';
 
 class LessonDetailScreen extends StatefulWidget {
@@ -19,17 +18,22 @@ class LessonDetailScreen extends StatefulWidget {
 class _LessonDetailScreenState extends State<LessonDetailScreen> {
   late YoutubePlayerController _controller;
   late String _videoId;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  final audio.AudioPlayer _audioPlayer = audio.AudioPlayer();
   bool _isPlaying = false;
   bool _hasError = false;
   String? _errorMessage;
+  bool _isVideoInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _initializeVideo();
+    _setupAudioPlayer();
+  }
+
+  void _setupAudioPlayer() {
     _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (state == AudioPlayerState.completed) {
+      if (state == audio.PlayerState.completed) {
         setState(() {
           _isPlaying = false;
         });
@@ -43,14 +47,17 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
       if (url.startsWith('https://youtu.be/')) {
         url = url.split('?')[0];
         _videoId = url.split('/').last;
-      } else {
+      } else if (url.startsWith('https://www.youtube.com/')) {
         _videoId = YoutubePlayer.convertUrlToId(url) ?? '';
+      } else {
+        _videoId = '';
       }
       
       if (_videoId.isEmpty) {
         setState(() {
           _hasError = true;
           _errorMessage = 'Invalid video URL';
+          _isVideoInitialized = true;
         });
         return;
       }
@@ -60,6 +67,8 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
         flags: const YoutubePlayerFlags(
           autoPlay: false,
           mute: false,
+          enableCaption: true,
+          hideControls: false,
         ),
       );
 
@@ -71,10 +80,15 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
           });
         }
       });
+
+      setState(() {
+        _isVideoInitialized = true;
+      });
     } catch (e) {
       setState(() {
         _hasError = true;
         _errorMessage = 'Error initializing video: $e';
+        _isVideoInitialized = true;
       });
     }
   }
@@ -99,7 +113,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
       if (_isPlaying) {
         await _audioPlayer.pause();
       } else {
-        await _audioPlayer.play(AssetSource(widget.lesson.audioUrl));
+        await _audioPlayer.play(audio.AssetSource(widget.lesson.audioUrl));
       }
       setState(() {
         _isPlaying = !_isPlaying;
@@ -149,7 +163,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                   ],
                 ),
               ),
-            if (_videoId.isNotEmpty)
+            if (_isVideoInitialized && _videoId.isNotEmpty)
               YoutubePlayer(
                 controller: _controller,
                 showVideoProgressIndicator: true,
@@ -188,7 +202,6 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                                   IconButton(
                                     icon: const Icon(Icons.volume_up, size: 18),
                                     onPressed: () async {
-                                      // TODO: Implement word pronunciation
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
                                           content: Text('Pronunciation for "$word" coming soon!'),

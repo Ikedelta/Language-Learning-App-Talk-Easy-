@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/splash/splash_screen.dart';
 import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
 import 'package:easy_talk/screens/auth/login_screen.dart';
+import 'package:easy_talk/screens/home/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Easy Talk',
+      debugShowCheckedModeBanner: true,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
         '/language-courses': (context) => const LanguageCoursesScreen(language: 'English'),
       },
     );

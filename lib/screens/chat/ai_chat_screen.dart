@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -11,6 +14,61 @@ class _AIChatScreenState extends State<AIChatScreen> {
   final _messageController = TextEditingController();
   final List<ChatMessage> _messages = [];
   bool _isListening = false;
+  bool _isLoading = false;
+  bool _isOffline = false;
+  // Note: In a production app, this API key should be stored securely
+  // and not hardcoded in the source code. Consider using environment variables
+  // or a backend server to handle API calls.
+  final String _apiKey = 'AIzaSyBgM0LutJvHpPJwMOdFTiMdnNYiMJYH2sA';
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+  }
+
+  Future<void> _checkConnectivity() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      _isOffline = connectivityResult == ConnectivityResult.none;
+    });
+
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      setState(() {
+        _isOffline = result == ConnectivityResult.none;
+      });
+    });
+  }
+
+  Future<String> _getAIResponse(String message) async {
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=$_apiKey'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {'text': message}
+              ]
+            }
+          ]
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['candidates'][0]['content']['parts'][0]['text'];
+      } else {
+        return 'Error: ${response.statusCode} - ${response.body}';
+      }
+    } catch (e) {
+      return 'Error: $e';
+    }
+  }
 
   @override
   void dispose() {
@@ -32,7 +90,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
     });
   }
 
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
 
@@ -45,22 +103,23 @@ class _AIChatScreenState extends State<AIChatScreen> {
         ),
       );
       _messageController.clear();
+      _isLoading = true;
     });
 
-    // TODO: Implement AI response
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
-        setState(() {
-          _messages.add(
-            ChatMessage(
-              text: "I'm a placeholder response. The AI integration will be implemented later.",
-              isUser: false,
-              timestamp: DateTime.now(),
-            ),
-          );
-        });
-      }
-    });
+    final response = await _getAIResponse(text);
+
+    if (mounted) {
+      setState(() {
+        _messages.add(
+          ChatMessage(
+            text: response,
+            isUser: false,
+            timestamp: DateTime.now(),
+          ),
+        );
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -79,6 +138,22 @@ class _AIChatScreenState extends State<AIChatScreen> {
       ),
       body: Column(
         children: [
+          if (_isOffline)
+            Container(
+              padding: const EdgeInsets.all(8),
+              color: Colors.red,
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.wifi_off, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text(
+                    'No internet connection',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -109,19 +184,22 @@ class _AIChatScreenState extends State<AIChatScreen> {
             child: Row(
               children: [
                 IconButton(
-                  onPressed: _isListening ? _stopListening : _startListening,
                   icon: Icon(
                     _isListening ? Icons.mic : Icons.mic_none,
-                    color: _isListening
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
+                    color: _isListening ? Colors.red : null,
                   ),
+                  onPressed: _isOffline
+                      ? null
+                      : (_isListening ? _stopListening : _startListening),
                 ),
                 Expanded(
                   child: TextField(
                     controller: _messageController,
+                    enabled: !_isOffline,
                     decoration: InputDecoration(
-                      hintText: 'Type your message...',
+                      hintText: _isOffline
+                          ? 'Offline - No internet connection'
+                          : 'Type a message...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -130,14 +208,19 @@ class _AIChatScreenState extends State<AIChatScreen> {
                         vertical: 8,
                       ),
                     ),
-                    maxLines: null,
-                    textCapitalization: TextCapitalization.sentences,
+                    onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
                 IconButton(
-                  onPressed: _sendMessage,
-                  icon: const Icon(Icons.send),
-                  color: Theme.of(context).colorScheme.primary,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.send),
+                  onPressed:
+                      _isOffline ? null : (_isLoading ? null : _sendMessage),
                 ),
               ],
             ),
@@ -233,4 +316,4 @@ class _ChatBubble extends StatelessWidget {
       ),
     );
   }
-} 
+}

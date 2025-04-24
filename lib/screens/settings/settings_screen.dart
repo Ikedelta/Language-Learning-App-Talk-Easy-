@@ -1,20 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:easy_talk/screens/auth/login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final Function() toggleTheme;
+
+  const SettingsScreen({
+    super.key,
+    required this.toggleTheme,
+  });
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _isDarkMode = false;
   bool _notifications = true;
   bool _soundEffects = true;
   String _selectedVoice = 'Default';
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -29,11 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     SwitchListTile(
                       title: const Text('Dark Mode'),
-                      value: _isDarkMode,
+                      value: isDarkMode,
                       onChanged: (value) {
-                        setState(() {
-                          _isDarkMode = value;
-                        });
+                        widget.toggleTheme();
                       },
                     ),
                   ],
@@ -117,8 +122,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.logout),
                       title: const Text('Sign Out'),
                       onTap: () {
-                        // TODO: Implement sign out
-                        Navigator.of(context).pushReplacementNamed('/login');
+                        // Sign out implementation
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                LoginScreen(toggleTheme: widget.toggleTheme),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -168,8 +178,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         const SizedBox(height: 8),
@@ -182,4 +192,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ],
     );
   }
-} 
+}

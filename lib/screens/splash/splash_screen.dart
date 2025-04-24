@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/splash/splash_screen_two.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  final Function() toggleTheme;
+
+  const SplashScreen({
+    super.key,
+    required this.toggleTheme,
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -75,16 +81,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 Text(
                   'EasyTalk',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Learn Languages with AI',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+                        color: Colors.white70,
+                      ),
                 ),
               ],
             ),
@@ -93,4 +99,4 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
   }
-} 
+}

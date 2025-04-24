@@ -5,7 +5,12 @@ import 'package:easy_talk/screens/settings/settings_screen.dart';
 import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final Function() toggleTheme;
+
+  const HomeScreen({
+    super.key,
+    required this.toggleTheme,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -73,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
@@ -81,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildHomeContent(),
             const AIChatScreen(),
             const ProfileScreen(),
-            const SettingsScreen(),
+            SettingsScreen(toggleTheme: widget.toggleTheme),
           ],
         ),
       ),
@@ -115,6 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildHomeContent() {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return CustomScrollView(
       slivers: [
         SliverAppBar(
@@ -127,6 +136,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 // TODO: Implement search
               },
             ),
+            IconButton(
+              icon: Icon(
+                isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              ),
+              onPressed: widget.toggleTheme,
+            ),
           ],
         ),
         SliverToBoxAdapter(
@@ -138,22 +153,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   'Welcome back!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Continue your language learning journey',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+                        color: Colors.grey[600],
+                      ),
                 ),
                 const SizedBox(height: 24),
                 Text(
                   'Available Languages',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -216,7 +231,8 @@ class _LanguageCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => LanguageCoursesScreen(language: language.name),
+                builder: (context) =>
+                    LanguageCoursesScreen(language: language.name),
               ),
             );
           } else {
@@ -243,15 +259,15 @@ class _LanguageCard extends StatelessWidget {
               Text(
                 language.name,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               const SizedBox(height: 4),
               Text(
                 language.level,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey[600],
-                ),
+                      color: Colors.grey[600],
+                    ),
               ),
               const Spacer(),
               Row(
@@ -265,8 +281,8 @@ class _LanguageCard extends StatelessWidget {
                   Text(
                     '${language.lessons} Lessons',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                          color: Colors.grey[600],
+                        ),
                   ),
                 ],
               ),
@@ -276,4 +292,4 @@ class _LanguageCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

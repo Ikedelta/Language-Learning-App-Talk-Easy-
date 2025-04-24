@@ -4,7 +4,12 @@ import 'package:easy_talk/screens/auth/forgot_password_screen.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final Function() toggleTheme;
+
+  const LoginScreen({
+    super.key,
+    required this.toggleTheme,
+  });
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -30,7 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(
+            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)),
       );
     }
     setState(() => _isLoading = false);
@@ -44,7 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(
+            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)),
       );
     }
     setState(() => _isLoading = false);
@@ -66,17 +73,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Welcome Back!',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Sign in to continue your learning journey',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                          color: Colors.grey[600],
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
@@ -199,7 +206,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const SignupScreen(),
+                              builder: (context) =>
+                                  SignupScreen(toggleTheme: widget.toggleTheme),
                             ),
                           );
                         },
@@ -215,4 +223,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-} 
+}

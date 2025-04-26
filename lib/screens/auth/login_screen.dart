@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/auth/signup_screen.dart';
 import 'package:easy_talk/screens/auth/forgot_password_screen.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
+import 'package:easy_talk/services/auth_service.dart';
+import 'package:easy_talk/services/logger_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -19,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
 
@@ -31,30 +37,141 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
-    // TODO: Implement Google Sign In
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)),
+    try {
+      Logger.debug('Starting Google Sign In process');
+
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        throw Exception('Google Sign In was cancelled by user');
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser.authentication;
+
+      if (googleAuth?.accessToken == null || googleAuth?.idToken == null) {
+        throw Exception('Could not get auth details from Google');
+      }
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
       );
+
+      // Sign in to Firebase with the Google credential
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user == null) {
+        throw Exception('Failed to sign in with Google');
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      Logger.error('Google Sign In Error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error signing in with Google: ${e.toString()}'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
-    setState(() => _isLoading = false);
   }
 
   Future<void> _signInWithEmail() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    // TODO: Implement Email Sign In
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)),
+    // Validate email format
+    final email = _emailController.text.trim();
+    if (!email.contains('@') || !email.contains('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          duration: Duration(seconds: 3),
+        ),
       );
+      return;
     }
-    setState(() => _isLoading = false);
+
+    setState(() => _isLoading = true);
+    try {
+      Logger.debug('Attempting to sign in with email: $email');
+
+      // Sign in using AuthService
+      final userCredential = await _authService.signInWithEmailAndPassword(
+        email: email,
+        password: _passwordController.text.trim(),
+      );
+
+      if (userCredential?.user != null) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+                builder: (context) =>
+                    HomeScreen(toggleTheme: widget.toggleTheme)),
+          );
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      Logger.error('Firebase Auth Error', e);
+      String message;
+      switch (e.code) {
+        case 'user-not-found':
+          message = 'No account found with this email. Please sign up first.';
+          break;
+        case 'wrong-password':
+          message = 'Wrong password provided. Please try again.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is invalid.';
+          break;
+        case 'user-disabled':
+          message = 'This user account has been disabled.';
+          break;
+        case 'too-many-requests':
+          message = 'Too many failed attempts. Please try again later.';
+          break;
+        default:
+          message = e.message ?? 'An error occurred during sign in.';
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      Logger.error('General Error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override

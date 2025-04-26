@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "427439703133",
+    "project_id": "easy-talk-16370",
+    "storage_bucket": "easy-talk-16370.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:427439703133:android:121d89bfe488343d3b39b4",
+        "android_client_info": {
+          "package_name": "com.languageapp.easy_talk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "427439703133-9nhr7pac9ule01h663bjffft1alfq7vn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.languageapp.easy_talk",
+            "certificate_hash": "d28c545b6a08667a124a71717009e8574a28a93e"
+          }
+        },
+        {
+          "client_id": "427439703133-3q5gqrddiedr4cqsrdb5a5v945i57oo1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjJOZTn-NzY7Ql_YpKO4r2SrF5METyX1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "427439703133-3q5gqrddiedr4cqsrdb5a5v945i57oo1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+} 

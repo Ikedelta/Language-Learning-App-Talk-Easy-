@@ -33,9 +33,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
       _isOffline = connectivityResult == ConnectivityResult.none;
     });
 
-    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+    Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> results) {
       setState(() {
-        _isOffline = result == ConnectivityResult.none;
+        _isOffline = results.contains(ConnectivityResult.none);
       });
     });
   }

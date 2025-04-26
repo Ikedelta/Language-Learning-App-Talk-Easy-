@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
+import 'package:easy_talk/services/auth_service.dart';
+import 'package:easy_talk/services/logger_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignupScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -19,6 +23,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _authService = AuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -35,16 +40,80 @@ class _SignupScreenState extends State<SignupScreen> {
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
-    // TODO: Implement Sign Up
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-            builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme)),
+    // Validate email format
+    final email = _emailController.text.trim();
+    if (!email.contains('@') || !email.contains('.')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address'),
+          duration: Duration(seconds: 3),
+        ),
       );
+      return;
     }
-    setState(() => _isLoading = false);
+
+    setState(() => _isLoading = true);
+    try {
+      Logger.debug('Attempting to sign up with email: $email');
+
+      // Sign up using AuthService
+      final userCredential = await _authService.signUpWithEmailAndPassword(
+        email: email,
+        password: _passwordController.text.trim(),
+        fullName: _nameController.text.trim(),
+      );
+
+      if (userCredential?.user != null) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+                builder: (context) =>
+                    HomeScreen(toggleTheme: widget.toggleTheme)),
+          );
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      Logger.error('Firebase Auth Error', e);
+      String message;
+      switch (e.code) {
+        case 'weak-password':
+          message = 'The password provided is too weak.';
+          break;
+        case 'email-already-in-use':
+          message = 'The account already exists for that email.';
+          break;
+        case 'invalid-email':
+          message = 'The email address is invalid.';
+          break;
+        case 'operation-not-allowed':
+          message = 'Email/password accounts are not enabled.';
+          break;
+        default:
+          message = e.message ?? 'An error occurred during sign up.';
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      Logger.error('General Error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('An error occurred: $e'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override

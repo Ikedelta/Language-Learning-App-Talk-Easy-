@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/auth/login_screen.dart';
+import 'package:easy_talk/screens/settings/edit_profile_screen.dart';
+import 'package:easy_talk/screens/settings/change_password_screen.dart';
+import 'package:easy_talk/screens/settings/privacy_policy_screen.dart';
+import 'package:easy_talk/screens/settings/terms_of_service_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -105,17 +109,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: 'Account',
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.person_outline),
+                      leading: const Icon(Icons.person),
                       title: const Text('Edit Profile'),
                       onTap: () {
-                        // TODO: Navigate to edit profile screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
-                      leading: const Icon(Icons.security),
+                      leading: const Icon(Icons.lock),
                       title: const Text('Change Password'),
                       onTap: () {
-                        // TODO: Navigate to change password screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChangePasswordScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
@@ -146,14 +160,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.description_outlined),
                       title: const Text('Privacy Policy'),
                       onTap: () {
-                        // TODO: Open privacy policy
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrivacyPolicyScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
                       leading: const Icon(Icons.gavel_outlined),
                       title: const Text('Terms of Service'),
                       onTap: () {
-                        // TODO: Open terms of service
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TermsOfServiceScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

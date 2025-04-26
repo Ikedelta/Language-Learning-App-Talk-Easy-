@@ -3,6 +3,9 @@ import 'package:easy_talk/screens/chat/ai_chat_screen.dart';
 import 'package:easy_talk/screens/profile/profile_screen.dart';
 import 'package:easy_talk/screens/settings/settings_screen.dart';
 import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
+import 'package:easy_talk/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -18,6 +21,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final AuthService _authService = AuthService();
+  Map<String, dynamic>? _userData;
+  bool _isLoading = true;
 
   final List<Language> _languages = [
     Language(
@@ -70,6 +76,23 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = _authService.currentUser;
+    if (user != null) {
+      final userData = await _authService.getUserData(user.uid);
+      setState(() {
+        _userData = userData.data() as Map<String, dynamic>?;
+        _isLoading = false;
+      });
+    }
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -79,13 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final firstName = _userData?['fullName']?.split(' ').first ?? 'User';
 
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
           index: _selectedIndex,
           children: [
-            _buildHomeContent(),
+            _buildHomeContent(firstName),
             const AIChatScreen(),
             const ProfileScreen(),
             SettingsScreen(toggleTheme: widget.toggleTheme),
@@ -121,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHomeContent() {
+  Widget _buildHomeContent(String firstName) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return CustomScrollView(
@@ -151,7 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome back!',
+                  'Welcome back, $firstName!',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

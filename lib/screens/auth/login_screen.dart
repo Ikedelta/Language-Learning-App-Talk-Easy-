@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
+      final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
       if (googleAuth?.accessToken == null || googleAuth?.idToken == null) {

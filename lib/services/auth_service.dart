@@ -32,6 +32,16 @@ class AuthService {
           'uid': userCredential.user!.uid,
           'email': email,
           'fullName': fullName,
+          'level': 1,
+          'xp': 0,
+          'timeSpent': 0,
+          'conversations': 0,
+          'streak': 0,
+          'achievements': {
+            'first_chat': false,
+            'thirty_minutes': false,
+            'three_day_streak': false,
+          },
           'createdAt': FieldValue.serverTimestamp(),
         });
       }

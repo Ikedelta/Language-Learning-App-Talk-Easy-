@@ -4,6 +4,9 @@ import 'package:easy_talk/screens/settings/edit_profile_screen.dart';
 import 'package:easy_talk/screens/settings/change_password_screen.dart';
 import 'package:easy_talk/screens/settings/privacy_policy_screen.dart';
 import 'package:easy_talk/screens/settings/terms_of_service_screen.dart';
+import 'package:easy_talk/services/auth_service.dart';
+import 'package:easy_talk/services/google_sign_in.dart';
+import 'package:easy_talk/services/logger_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -18,9 +21,42 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final _authService = AuthService();
+  final _googleSignInService = GoogleSignInService();
   bool _notifications = true;
   bool _soundEffects = true;
   String _selectedVoice = 'Default';
+
+  Future<void> _signOut() async {
+    try {
+      Logger.debug('Starting sign out process');
+
+      // Sign out from Google Sign In
+      await _googleSignInService.signOut();
+
+      // Sign out from Firebase Auth
+      await _authService.signOut();
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
+          ),
+        );
+      }
+    } catch (e, stackTrace) {
+      Logger.error('Sign out error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error signing out: ${e.toString()}'),
+            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,13 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       leading: const Icon(Icons.logout),
                       title: const Text('Sign Out'),
                       onTap: () {
-                        // Sign out implementation
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                LoginScreen(toggleTheme: widget.toggleTheme),
-                          ),
-                        );
+                        _signOut();
                       },
                     ),
                   ],

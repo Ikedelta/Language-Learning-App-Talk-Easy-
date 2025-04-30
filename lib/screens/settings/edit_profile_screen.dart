@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:easy_talk/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});

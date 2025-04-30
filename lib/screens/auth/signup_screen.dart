@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
 import 'package:easy_talk/services/auth_service.dart';
 import 'package:easy_talk/services/logger_service.dart';
+import 'package:easy_talk/services/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignupScreen extends StatefulWidget {
   final Function() toggleTheme;
@@ -23,6 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
+  final _googleSignInService = GoogleSignInService();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -104,6 +108,39 @@ class _SignupScreenState extends State<SignupScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('An error occurred: $e'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() => _isLoading = true);
+    try {
+      Logger.debug('Starting Google Sign In process');
+
+      final userCredential = await _googleSignInService.signInWithGoogle();
+
+      if (userCredential?.user != null) {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme),
+            ),
+          );
+        }
+      }
+    } catch (e, stackTrace) {
+      Logger.error('Google Sign In Error', e, stackTrace);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error signing in with Google: ${e.toString()}'),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -268,6 +305,32 @@ class _SignupScreenState extends State<SignupScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Text('Sign Up'),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: Colors.grey[300])),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ),
+                      Expanded(child: Divider(color: Colors.grey[300])),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  OutlinedButton.icon(
+                    onPressed: _isLoading ? null : _signInWithGoogle,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.g_mobiledata, size: 24),
+                    label: const Text('Sign up with Google'),
                   ),
                   const SizedBox(height: 24),
                   Row(

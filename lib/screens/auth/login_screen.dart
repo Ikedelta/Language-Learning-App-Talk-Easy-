@@ -51,14 +51,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      if (googleAuth?.accessToken == null || googleAuth?.idToken == null) {
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
         throw Exception('Could not get auth details from Google');
       }
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
       // Sign in to Firebase with the Google credential
@@ -66,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
           await FirebaseAuth.instance.signInWithCredential(credential);
 
       if (userCredential.user == null) {
-        throw Exception('Failed to sign in with Google');
+        throw Exception('Failed to sign in with Google - No user returned');
       }
 
       if (mounted) {
@@ -83,6 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
           SnackBar(
             content: Text('Error signing in with Google: ${e.toString()}'),
             duration: const Duration(seconds: 5),
+            backgroundColor: Colors.red,
           ),
         );
       }

@@ -29,14 +29,26 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        multiDexEnabled = true
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -47,10 +59,14 @@ dependencies {
     // Add the dependencies for Firebase products you want to use
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.firebase:firebase-firestore")
     
     // Add explicit Google Sign In dependency
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.android.gms:play-services-auth-api-phone:18.0.1")
+    
+    // Support for multidex
+    implementation("androidx.multidex:multidex:2.0.1")
 }
 
 flutter {

@@ -4,8 +4,6 @@ import 'package:easy_talk/screens/profile/profile_screen.dart';
 import 'package:easy_talk/screens/settings/settings_screen.dart';
 import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
 import 'package:easy_talk/services/auth_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function() toggleTheme;

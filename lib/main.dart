@@ -6,19 +6,37 @@ import 'package:easy_talk/screens/auth/signup_screen.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:easy_talk/services/auth_service.dart';
+import 'package:easy_talk/services/course_content_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Initialize course content
+  final courseService = CourseContentService();
+  await courseService.initializeDefaultCourses();
+
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;
-  runApp(MyApp(isDarkMode: isDarkMode));
+  final authService = AuthService();
+  final user = authService.currentUser;
+
+  runApp(MyApp(
+    isDarkMode: isDarkMode,
+    initialRoute: user != null ? '/home' : '/splash',
+  ));
 }
 
 class MyApp extends StatefulWidget {
   final bool isDarkMode;
+  final String initialRoute;
 
-  const MyApp({super.key, required this.isDarkMode});
+  const MyApp({
+    super.key,
+    required this.isDarkMode,
+    required this.initialRoute,
+  });
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -61,8 +79,9 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: SplashScreen(toggleTheme: toggleTheme),
+      initialRoute: widget.initialRoute,
       routes: {
+        '/splash': (context) => SplashScreen(toggleTheme: toggleTheme),
         '/login': (context) => LoginScreen(toggleTheme: toggleTheme),
         '/home': (context) => HomeScreen(toggleTheme: toggleTheme),
         '/signup': (context) => SignupScreen(toggleTheme: toggleTheme),

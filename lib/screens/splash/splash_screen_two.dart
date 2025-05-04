@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_talk/services/auth_service.dart';
 
 class SplashScreenTwo extends StatefulWidget {
   const SplashScreenTwo({super.key});
@@ -7,7 +8,8 @@ class SplashScreenTwo extends StatefulWidget {
   State<SplashScreenTwo> createState() => _SplashScreenTwoState();
 }
 
-class _SplashScreenTwoState extends State<SplashScreenTwo> with SingleTickerProviderStateMixin {
+class _SplashScreenTwoState extends State<SplashScreenTwo>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -41,7 +43,13 @@ class _SplashScreenTwoState extends State<SplashScreenTwo> with SingleTickerProv
   void _navigateToLanguageCourses() async {
     await Future.delayed(const Duration(seconds: 3));
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+      final authService = AuthService();
+      final user = authService.currentUser;
+      if (user != null) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
     }
   }
 
@@ -72,16 +80,16 @@ class _SplashScreenTwoState extends State<SplashScreenTwo> with SingleTickerProv
                 Text(
                   'Choose Your Language',
                   style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Start your learning journey today',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
+                        color: Colors.white70,
+                      ),
                 ),
               ],
             ),
@@ -90,4 +98,4 @@ class _SplashScreenTwoState extends State<SplashScreenTwo> with SingleTickerProv
       ),
     );
   }
-} 
+}

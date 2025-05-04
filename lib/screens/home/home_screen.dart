@@ -249,7 +249,11 @@ class _LanguageCard extends StatelessWidget {
       ),
       child: InkWell(
         onTap: () {
-          if (language.name == 'English' || language.name == 'Spanish') {
+          if (language.name == 'English' ||
+              language.name == 'Spanish' ||
+              language.name == 'French' ||
+              language.name == 'German' ||
+              language.name == 'Japanese') {
             Navigator.push(
               context,
               MaterialPageRoute(

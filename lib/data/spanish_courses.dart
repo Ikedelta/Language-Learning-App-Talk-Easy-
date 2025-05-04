@@ -3,8 +3,9 @@ import '../models/language_course.dart';
 final List<LanguageCourse> spanishCourses = [
   LanguageCourse(
     id: 'spa_beg_1',
-    title: 'Spanish for Beginners',
-    description: 'Start your Spanish learning journey with basic vocabulary and grammar. Perfect for absolute beginners.',
+    title: 'Español para Principiantes',
+    description:
+        'Comienza tu viaje de aprendizaje del español con vocabulario y gramática básicos. Perfecto para principiantes absolutos.',
     level: 'Beginner',
     language: 'Spanish',
     imageUrl: 'assets/images/spanish_beginner.jpg',
@@ -21,20 +22,20 @@ final List<LanguageCourse> spanishCourses = [
           'Me llamo...',
           'Mucho gusto',
           '¿Cómo estás?',
-          'Bien, gracias',
+          'Estoy bien, gracias',
           'Adiós'
         ],
         grammarPoints: [
-          'Estructura básica de la oración',
-          'Pronombres personales (yo, tú, él, ella, nosotros, ustedes, ellos)',
+          'Estructura básica de oraciones',
+          'Pronombres personales',
           'Presente simple',
           'Formación de preguntas'
         ],
         exercises: [
           'Practicar saludos con diferentes personas',
           'Presentarte a un compañero',
-          'Escribir una breve presentación personal',
-          'Jugar roles en situaciones sociales comunes'
+          'Escribir una breve presentación',
+          'Role-play de situaciones sociales comunes'
         ],
         audioUrl: 'assets/audio/spa_beg_1_1.mp3',
         videoUrl: 'assets/video/spa_beg_1_1.mp4',
@@ -42,12 +43,11 @@ final List<LanguageCourse> spanishCourses = [
 # Saludos y Presentaciones
 
 ## Saludos Básicos
-- Hola
-- Buenos días (mañana)
-- Buenas tardes (tarde)
-- Buenas noches (noche)
+- Hola / Buenos días (antes del mediodía)
+- Buenas tardes (mediodía - 6pm)
+- Buenas noches (después de las 6pm)
 
-## Presentarse
+## Presentaciones
 1. Comienza con un saludo
 2. Di tu nombre: "Me llamo [nombre]" o "Soy [nombre]"
 3. Pregunta el nombre de la otra persona: "¿Cómo te llamas?"
@@ -55,7 +55,7 @@ final List<LanguageCourse> spanishCourses = [
 
 ## Frases Comunes
 - ¿Cómo estás?
-- Bien, gracias
+- Estoy bien, gracias
 - ¿Y tú?
 - Adiós / Hasta luego
 
@@ -127,30 +127,30 @@ final List<LanguageCourse> spanishCourses = [
 - ¿Qué hora es?
 - Es la una
 - Son las [hora]
-- Uso de AM/PM
+- AM/PM
 
 ## Días de la Semana
-- lunes
-- martes
-- miércoles
-- jueves
-- viernes
-- sábado
-- domingo
+- Lunes
+- Martes
+- Miércoles
+- Jueves
+- Viernes
+- Sábado
+- Domingo
 
 ## Meses del Año
-- enero
-- febrero
-- marzo
-- abril
-- mayo
-- junio
-- julio
-- agosto
-- septiembre
-- octubre
-- noviembre
-- diciembre
+- Enero
+- Febrero
+- Marzo
+- Abril
+- Mayo
+- Junio
+- Julio
+- Agosto
+- Septiembre
+- Octubre
+- Noviembre
+- Diciembre
 
 ## Ejercicios de Práctica
 1. Escribir la fecha de hoy
@@ -159,12 +159,178 @@ final List<LanguageCourse> spanishCourses = [
 4. Practicar contar dinero
 ''',
       ),
+      CourseLesson(
+        id: 'spa_beg_1_3',
+        title: 'Actividades Diarias',
+        description:
+            'Aprende vocabulario y frases para actividades diarias comunes.',
+        vocabulary: [
+          'Despertarse',
+          'Vestirse',
+          'Desayunar',
+          'Ir al trabajo',
+          'Almorzar',
+          'Volver a casa',
+          'Cenar',
+          'Ir a la cama',
+          'Ducharse',
+          'Cepillarse los dientes'
+        ],
+        grammarPoints: [
+          'Presente simple para rutinas',
+          'Expresiones de tiempo',
+          'Adverbios de frecuencia',
+          'Preguntas sobre rutinas diarias'
+        ],
+        exercises: [
+          'Describir tu rutina diaria',
+          'Crear un horario diario',
+          'Preguntar sobre las actividades de alguien',
+          'Escribir sobre tu día ideal'
+        ],
+        audioUrl: 'assets/audio/spa_beg_1_3.mp3',
+        videoUrl: 'assets/video/spa_beg_1_3.mp4',
+        notes: '''
+# Actividades Diarias
+
+## Rutinas Comunes
+1. Rutina Matutina
+   - Despertarse
+   - Vestirse
+   - Desayunar
+   - Ir al trabajo/escuela
+
+2. Actividades de la Tarde
+   - Almorzar
+   - Trabajar/Estudiar
+   - Tomar un descanso
+   - Volver a casa
+
+3. Rutina Nocturna
+   - Cenar
+   - Ver televisión
+   - Leer un libro
+   - Ir a la cama
+
+## Expresiones de Tiempo
+- Por la mañana
+- Por la tarde
+- Por la noche
+- A [hora específica]
+
+## Adverbios de Frecuencia
+- Siempre
+- Usualmente
+- A menudo
+- A veces
+- Nunca
+
+## Diálogos de Práctica
+1. Rutina Matutina:
+   A: ¿A qué hora te despiertas?
+   B: Me despierto a las 7:00 AM.
+   A: ¿Qué haces después de despertarte?
+   B: Me ducho y desayuno.
+
+2. Rutina Nocturna:
+   A: ¿Qué haces por la noche?
+   B: Ceno a las 7:00 PM y veo televisión.
+   A: ¿A qué hora te acuestas?
+   B: Usualmente me acuesto a las 10:00 PM.
+''',
+      ),
+      CourseLesson(
+        id: 'spa_beg_1_4',
+        title: 'Comida y Bebidas',
+        description:
+            'Aprende vocabulario y frases relacionadas con la comida, bebidas y pedidos en restaurantes.',
+        vocabulary: [
+          'Desayuno',
+          'Almuerzo',
+          'Cena',
+          'Agua',
+          'Café',
+          'Té',
+          'Pan',
+          'Arroz',
+          'Carne',
+          'Verduras',
+          'Frutas',
+          'Postre'
+        ],
+        grammarPoints: [
+          'Sustantivos contables e incontables',
+          'Alguno y ninguno',
+          'Gustaría',
+          'Pedir comida'
+        ],
+        exercises: [
+          'Crear una lista de compras',
+          'Pedir comida en un restaurante',
+          'Describir tu comida favorita',
+          'Planear un menú para una fiesta'
+        ],
+        audioUrl: 'assets/audio/spa_beg_1_4.mp3',
+        videoUrl: 'assets/video/spa_beg_1_4.mp4',
+        notes: '''
+# Comida y Bebidas
+
+## Comidas Comunes
+1. Desayuno
+   - Pan
+   - Huevos
+   - Cereal
+   - Fruta
+
+2. Almuerzo/Cena
+   - Arroz
+   - Carne
+   - Verduras
+   - Ensalada
+
+3. Bebidas
+   - Agua
+   - Café
+   - Té
+   - Jugo
+
+## Pedir Comida
+- Me gustaría...
+- ¿Puedo tener...?
+- ¿Qué te gustaría?
+- ¿Tienes...?
+
+## Contable vs Incontable
+Contable:
+- Una manzana
+- Dos sándwiches
+- Tres tazas de café
+
+Incontable:
+- Un poco de arroz
+- Un poco de agua
+- Un poco de pan
+
+## Diálogos de Práctica
+1. En un Restaurante:
+   A: ¿Qué te gustaría ordenar?
+   B: Me gustaría un sándwich y una taza de café.
+   A: ¿Te gustaría algo más?
+   B: No, gracias.
+
+2. En una Cafetería:
+   A: ¿Puedo tener una taza de té, por favor?
+   B: ¿Te gustaría leche y azúcar?
+   A: Sí, por favor. Y un pedazo de pastel.
+''',
+      ),
     ],
   ),
   LanguageCourse(
     id: 'spa_int_1',
     title: 'Español Intermedio',
-    description: 'Desarrolla tus habilidades básicas de español con gramática y vocabulario más complejos.',
+    description:
+        'Desarrolla tus habilidades básicas de español con gramática y vocabulario más complejos.',
     level: 'Intermediate',
     language: 'Spanish',
     imageUrl: 'assets/images/spanish_intermediate.jpg',
@@ -172,7 +338,8 @@ final List<LanguageCourse> spanishCourses = [
       CourseLesson(
         id: 'spa_int_1_1',
         title: 'Tiempos Pasados',
-        description: 'Aprende a hablar sobre eventos pasados usando diferentes tiempos verbales.',
+        description:
+            'Aprende a hablar sobre eventos pasados usando diferentes tiempos verbales.',
         vocabulary: [
           'Verbos regulares',
           'Verbos irregulares',
@@ -183,13 +350,13 @@ final List<LanguageCourse> spanishCourses = [
           'Pretérito perfecto simple',
           'Pretérito imperfecto',
           'Pretérito pluscuamperfecto',
-          'Usos de "solía" + infinitivo'
+          'Usado para + infinitivo'
         ],
         exercises: [
           'Escribir sobre tus últimas vacaciones',
           'Describir un recuerdo de la infancia',
           'Contar una historia usando diferentes tiempos pasados',
-          'Practicar formas verbales irregulares'
+          'Practicar formas de verbos irregulares'
         ],
         audioUrl: 'assets/audio/spa_int_1_1.mp3',
         videoUrl: 'assets/video/spa_int_1_1.mp4',
@@ -200,19 +367,19 @@ final List<LanguageCourse> spanishCourses = [
 Usado para acciones completadas en el pasado.
 
 ### Verbos Regulares
-- Añadir terminaciones -é, -aste, -ó, -amos, -asteis, -aron
-- Ejemplo: hablar → hablé, hablaste, habló, hablamos, hablasteis, hablaron
+- Añadir -é, -aste, -ó, -amos, -asteis, -aron
+- Ejemplo: caminar → caminé, caminaste, caminó
 
 ### Verbos Irregulares
-- Deben memorizarse
-- Ejemplo: ir → fui, fuiste, fue, fuimos, fuisteis, fueron
+- Deben ser memorizados
+- Ejemplo: ir → fui, fuiste, fue
 
 ## Pretérito Imperfecto
 Usado para acciones en progreso en el pasado.
 
 ### Estructura
-- Sujeto + era/eras/era/éramos/erais/eran + verbo
-- Ejemplo: Yo estudiaba cuando llamaste.
+- Sujeto + estaba/estabas + verbo-ing
+- Ejemplo: Yo estaba estudiando cuando llamaste.
 
 ## Pretérito Pluscuamperfecto
 Usado para acciones completadas antes de otra acción pasada.
@@ -225,16 +392,17 @@ Usado para acciones completadas antes de otra acción pasada.
 1. Escribir una entrada de diario sobre ayer
 2. Describir lo que estabas haciendo en momentos específicos
 3. Contar una historia usando todos los tiempos pasados
-4. Practicar formas verbales irregulares
+4. Practicar formas de verbos irregulares
 ''',
       ),
       CourseLesson(
         id: 'spa_int_1_2',
         title: 'Condicionales',
-        description: 'Aprende a expresar situaciones hipotéticas y sus consecuencias.',
+        description:
+            'Aprende a expresar situaciones hipotéticas y sus consecuencias.',
         vocabulary: [
-          'Oraciones con "si"',
-          'Oraciones de resultado',
+          'Cláusulas si',
+          'Cláusulas de resultado',
           'Verbos modales',
           'Conjunciones'
         ],
@@ -246,7 +414,7 @@ Usado para acciones completadas antes de otra acción pasada.
         ],
         exercises: [
           'Crear oraciones condicionales',
-          'Jugar roles en situaciones hipotéticas',
+          'Role-play de situaciones hipotéticas',
           'Escribir sobre tus sueños y deseos',
           'Discutir posibles escenarios futuros'
         ],
@@ -285,11 +453,11 @@ Usado para situaciones hipotéticas pasadas.
 
 ## Ejercicios de Práctica
 1. Crear oraciones para cada tipo de condicional
-2. Jugar roles en diferentes escenarios
+2. Role-play de diferentes escenarios
 3. Escribir sobre tus sueños y deseos
 4. Discutir posibles escenarios futuros
 ''',
       ),
     ],
   ),
-]; 
+];

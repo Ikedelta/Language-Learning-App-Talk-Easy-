@@ -309,7 +309,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: const Icon(Icons.g_mobiledata, size: 24),
+                    icon: const Icon(
+                      Icons.g_translate_rounded,
+                      size: 24,
+                      color: Colors.blue,
+                    ),
                     label: const Text('Sign in with Google'),
                   ),
                   const SizedBox(height: 24),

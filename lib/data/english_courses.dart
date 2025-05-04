@@ -4,7 +4,8 @@ final List<LanguageCourse> englishCourses = [
   LanguageCourse(
     id: 'eng_beg_1',
     title: 'English for Beginners',
-    description: 'Start your English learning journey with basic vocabulary and grammar. Perfect for absolute beginners.',
+    description:
+        'Start your English learning journey with basic vocabulary and grammar. Perfect for absolute beginners.',
     level: 'Beginner',
     language: 'English',
     imageUrl: 'assets/images/english_beginner.jpg',
@@ -12,7 +13,8 @@ final List<LanguageCourse> englishCourses = [
       CourseLesson(
         id: 'eng_beg_1_1',
         title: 'Greetings and Introductions',
-        description: 'Learn how to greet people and introduce yourself in English.',
+        description:
+            'Learn how to greet people and introduce yourself in English.',
         vocabulary: [
           'Hello',
           'Hi',
@@ -161,12 +163,179 @@ final List<LanguageCourse> englishCourses = [
 4. Practice counting money
 ''',
       ),
+      CourseLesson(
+        id: 'eng_beg_1_3',
+        title: 'Daily Activities',
+        description:
+            'Learn vocabulary and phrases for common daily activities.',
+        vocabulary: [
+          'Wake up',
+          'Get dressed',
+          'Have breakfast',
+          'Go to work',
+          'Have lunch',
+          'Go home',
+          'Have dinner',
+          'Go to bed',
+          'Take a shower',
+          'Brush teeth'
+        ],
+        grammarPoints: [
+          'Present simple tense for routines',
+          'Time expressions',
+          'Adverbs of frequency',
+          'Daily routine questions'
+        ],
+        exercises: [
+          'Describe your daily routine',
+          'Create a daily schedule',
+          'Ask about someone\'s daily activities',
+          'Write about your ideal day'
+        ],
+        audioUrl: 'assets/audio/eng_beg_1_3.mp3',
+        videoUrl: 'assets/video/eng_beg_1_3.mp4',
+        notes: '''
+# Daily Activities
+
+## Common Daily Routines
+1. Morning Routine
+   - Wake up
+   - Get dressed
+   - Have breakfast
+   - Go to work/school
+
+2. Afternoon Activities
+   - Have lunch
+   - Work/Study
+   - Take a break
+   - Go home
+
+3. Evening Routine
+   - Have dinner
+   - Watch TV
+   - Read a book
+   - Go to bed
+
+## Time Expressions
+- In the morning
+- In the afternoon
+- In the evening
+- At night
+- At [specific time]
+
+## Adverbs of Frequency
+- Always
+- Usually
+- Often
+- Sometimes
+- Never
+
+## Practice Dialogues
+1. Morning Routine:
+   A: What time do you wake up?
+   B: I wake up at 7:00 AM.
+   A: What do you do after waking up?
+   B: I take a shower and have breakfast.
+
+2. Evening Routine:
+   A: What do you do in the evening?
+   B: I have dinner at 7:00 PM and watch TV.
+   A: What time do you go to bed?
+   B: I usually go to bed at 10:00 PM.
+''',
+      ),
+      CourseLesson(
+        id: 'eng_beg_1_4',
+        title: 'Food and Drinks',
+        description:
+            'Learn vocabulary and phrases related to food, drinks, and ordering at restaurants.',
+        vocabulary: [
+          'Breakfast',
+          'Lunch',
+          'Dinner',
+          'Water',
+          'Coffee',
+          'Tea',
+          'Bread',
+          'Rice',
+          'Meat',
+          'Vegetables',
+          'Fruits',
+          'Dessert'
+        ],
+        grammarPoints: [
+          'Countable and uncountable nouns',
+          'Some and any',
+          'Would like',
+          'Ordering food'
+        ],
+        exercises: [
+          'Create a shopping list',
+          'Order food at a restaurant',
+          'Describe your favorite meal',
+          'Plan a menu for a party'
+        ],
+        audioUrl: 'assets/audio/eng_beg_1_4.mp3',
+        videoUrl: 'assets/video/eng_beg_1_4.mp4',
+        notes: '''
+# Food and Drinks
+
+## Common Foods
+1. Breakfast
+   - Bread
+   - Eggs
+   - Cereal
+   - Fruit
+
+2. Lunch/Dinner
+   - Rice
+   - Meat
+   - Vegetables
+   - Salad
+
+3. Drinks
+   - Water
+   - Coffee
+   - Tea
+   - Juice
+
+## Ordering Food
+- I would like...
+- Can I have...
+- What would you like?
+- Do you have...?
+
+## Countable vs Uncountable
+Countable:
+- An apple
+- Two sandwiches
+- Three cups of coffee
+
+Uncountable:
+- Some rice
+- Some water
+- Some bread
+
+## Practice Dialogues
+1. At a Restaurant:
+   A: What would you like to order?
+   B: I would like a sandwich and a cup of coffee.
+   A: Would you like anything else?
+   B: No, thank you.
+
+2. At a Cafe:
+   A: Can I have a cup of tea, please?
+   B: Would you like milk and sugar?
+   A: Yes, please. And a piece of cake.
+''',
+      ),
     ],
   ),
   LanguageCourse(
     id: 'eng_int_1',
     title: 'Intermediate English',
-    description: 'Build on your basic English skills with more complex grammar and vocabulary.',
+    description:
+        'Build on your basic English skills with more complex grammar and vocabulary.',
     level: 'Intermediate',
     language: 'English',
     imageUrl: 'assets/images/english_intermediate.jpg',
@@ -174,7 +343,8 @@ final List<LanguageCourse> englishCourses = [
       CourseLesson(
         id: 'eng_int_1_1',
         title: 'Past Tenses',
-        description: 'Learn to talk about past events using different past tenses.',
+        description:
+            'Learn to talk about past events using different past tenses.',
         vocabulary: [
           'Regular verbs',
           'Irregular verbs',
@@ -233,7 +403,8 @@ Used for actions completed before another past action.
       CourseLesson(
         id: 'eng_int_1_2',
         title: 'Conditionals',
-        description: 'Learn to express hypothetical situations and their consequences.',
+        description:
+            'Learn to express hypothetical situations and their consequences.',
         vocabulary: [
           'If clauses',
           'Result clauses',
@@ -292,25 +463,88 @@ Used for hypothetical past situations.
 4. Discuss possible future scenarios
 ''',
       ),
-    ],
-  ),
-  LanguageCourse(
-    id: 'eng_adv_1',
-    title: 'Advanced English',
-    description: 'Master complex grammar structures and expand your vocabulary for fluent communication.',
-    level: 'Advanced',
-    language: 'English',
-    imageUrl: 'assets/images/english_advanced.jpg',
-    lessons: [
       CourseLesson(
-        id: 'eng_adv_1_1',
+        id: 'eng_int_1_3',
+        title: 'Present Perfect Tense',
+        description:
+            'Learn to talk about experiences and actions that started in the past and continue to the present.',
+        vocabulary: [
+          'Experience',
+          'Achievement',
+          'Result',
+          'Change',
+          'Duration',
+          'Since',
+          'For',
+          'Already',
+          'Yet',
+          'Just'
+        ],
+        grammarPoints: [
+          'Present perfect structure',
+          'Regular and irregular past participles',
+          'Time expressions with present perfect',
+          'Present perfect vs past simple'
+        ],
+        exercises: [
+          'Write about your life experiences',
+          'Create a list of achievements',
+          'Interview a partner about their experiences',
+          'Write a travel blog entry'
+        ],
+        audioUrl: 'assets/audio/eng_int_1_3.mp3',
+        videoUrl: 'assets/video/eng_int_1_3.mp4',
+        notes: '''
+# Present Perfect Tense
+
+## Structure
+- Subject + have/has + past participle
+- Example: I have visited Paris.
+
+## Uses
+1. Experiences
+   - I have been to Japan.
+   - She has never eaten sushi.
+
+2. Changes over time
+   - The city has grown a lot.
+   - Technology has improved.
+
+3. Achievements
+   - Scientists have discovered a new planet.
+   - I have finished my project.
+
+## Time Expressions
+- Ever
+- Never
+- Already
+- Yet
+- Just
+- Since
+- For
+
+## Practice Exercises
+1. Write about your travel experiences
+2. List your achievements this year
+3. Describe changes in your life
+4. Interview a partner about their experiences
+''',
+      ),
+      CourseLesson(
+        id: 'eng_int_1_4',
         title: 'Reported Speech',
         description: 'Learn how to report what someone else has said.',
         vocabulary: [
-          'Reporting verbs',
-          'Time expressions',
-          'Pronouns',
-          'Tense changes'
+          'Report',
+          'Quote',
+          'Statement',
+          'Question',
+          'Command',
+          'Request',
+          'Advice',
+          'Promise',
+          'Warning',
+          'Suggestion'
         ],
         grammarPoints: [
           'Direct to indirect speech',
@@ -324,8 +558,8 @@ Used for hypothetical past situations.
           'Tell a story using reported speech',
           'Practice different reporting verbs'
         ],
-        audioUrl: 'assets/audio/eng_adv_1_1.mp3',
-        videoUrl: 'assets/video/eng_adv_1_1.mp4',
+        audioUrl: 'assets/audio/eng_int_1_4.mp3',
+        videoUrl: 'assets/video/eng_int_1_4.mp4',
         notes: '''
 # Reported Speech
 
@@ -356,54 +590,259 @@ Reported: He said he was going to the store.
 4. Practice different reporting verbs
 ''',
       ),
+    ],
+  ),
+  LanguageCourse(
+    id: 'eng_adv_1',
+    title: 'Advanced English',
+    description:
+        'Master complex grammar structures and expand your vocabulary for professional and academic contexts.',
+    level: 'Advanced',
+    language: 'English',
+    imageUrl: 'assets/images/english_advanced.jpg',
+    lessons: [
       CourseLesson(
-        id: 'eng_adv_1_2',
-        title: 'Idioms and Phrasal Verbs',
-        description: 'Learn common English idioms and phrasal verbs for natural communication.',
+        id: 'eng_adv_1_1',
+        title: 'Advanced Grammar Structures',
+        description:
+            'Learn complex grammatical structures used in formal and academic English.',
         vocabulary: [
-          'Common idioms',
-          'Phrasal verbs',
-          'Collocations',
-          'Expressions'
+          'Subjunctive mood',
+          'Inversion',
+          'Cleft sentences',
+          'Emphatic structures'
         ],
         grammarPoints: [
-          'Idiom usage',
-          'Phrasal verb patterns',
-          'Collocation rules',
-          'Expression context'
+          'Subjunctive mood',
+          'Inversion after negative adverbials',
+          'Cleft sentences for emphasis',
+          'Advanced conditionals'
         ],
         exercises: [
-          'Create sentences with idioms',
-          'Practice phrasal verbs in context',
-          'Write a story using idioms',
-          'Role-play using expressions'
+          'Rewrite sentences using inversion',
+          'Create cleft sentences for emphasis',
+          'Practice subjunctive mood in formal contexts',
+          'Write complex conditional sentences'
+        ],
+        audioUrl: 'assets/audio/eng_adv_1_1.mp3',
+        videoUrl: 'assets/video/eng_adv_1_1.mp4',
+        notes: '''
+# Advanced Grammar Structures
+
+## Subjunctive Mood
+Used to express wishes, suggestions, and hypothetical situations.
+
+### Examples:
+- I suggest that he be present at the meeting.
+- It's important that she arrive on time.
+
+## Inversion
+Used for emphasis and in formal writing.
+
+### Examples:
+- Never have I seen such a beautiful sunset.
+- Not only did he finish the project, but he also exceeded expectations.
+
+## Cleft Sentences
+Used to emphasize specific information.
+
+### Examples:
+- What I need is more time.
+- It was the manager who made the final decision.
+
+## Practice Exercises
+1. Rewrite sentences using inversion
+2. Create cleft sentences for emphasis
+3. Write formal suggestions using subjunctive
+4. Combine different advanced structures
+''',
+      ),
+      CourseLesson(
+        id: 'eng_adv_1_2',
+        title: 'Academic Writing',
+        description:
+            'Develop skills for writing academic papers and formal documents.',
+        vocabulary: [
+          'Thesis statement',
+          'Literature review',
+          'Methodology',
+          'Citation styles'
+        ],
+        grammarPoints: [
+          'Formal academic style',
+          'Citation and referencing',
+          'Academic vocabulary',
+          'Complex sentence structures'
+        ],
+        exercises: [
+          'Write an academic abstract',
+          'Create a literature review',
+          'Practice proper citation',
+          'Develop a research proposal'
         ],
         audioUrl: 'assets/audio/eng_adv_1_2.mp3',
         videoUrl: 'assets/video/eng_adv_1_2.mp4',
         notes: '''
-# Idioms and Phrasal Verbs
+# Academic Writing
 
-## Common Idioms
-1. Break a leg - Good luck
-2. Hit the books - Study
-3. Pull someone's leg - Joke with someone
-4. Under the weather - Feeling sick
-5. Spill the beans - Reveal a secret
+## Structure of Academic Papers
+1. Abstract
+2. Introduction
+3. Literature Review
+4. Methodology
+5. Results
+6. Discussion
+7. Conclusion
+8. References
 
-## Phrasal Verbs
-1. Look up - Search for information
-2. Give up - Stop trying
-3. Take off - Remove or leave
-4. Put off - Postpone
-5. Turn down - Reject
+## Academic Style
+- Use formal language
+- Avoid contractions
+- Use passive voice appropriately
+- Maintain objectivity
+
+## Citation Styles
+- APA
+- MLA
+- Chicago
+- Harvard
 
 ## Practice Exercises
-1. Create sentences with idioms
-2. Practice phrasal verbs in context
-3. Write a story using idioms
-4. Role-play using expressions
+1. Write an abstract for a research paper
+2. Create a literature review outline
+3. Practice proper citation
+4. Develop a research proposal
+''',
+      ),
+      CourseLesson(
+        id: 'eng_adv_1_3',
+        title: 'Business English',
+        description:
+            'Learn professional communication skills for the workplace.',
+        vocabulary: [
+          'Meeting',
+          'Presentation',
+          'Negotiation',
+          'Deadline',
+          'Budget',
+          'Strategy',
+          'Performance',
+          'Leadership',
+          'Teamwork',
+          'Innovation'
+        ],
+        grammarPoints: [
+          'Formal business language',
+          'Email etiquette',
+          'Meeting phrases',
+          'Presentation skills'
+        ],
+        exercises: [
+          'Write a business email',
+          'Prepare a meeting agenda',
+          'Create a presentation outline',
+          'Role-play a business negotiation'
+        ],
+        audioUrl: 'assets/audio/eng_adv_1_3.mp3',
+        videoUrl: 'assets/video/eng_adv_1_3.mp4',
+        notes: '''
+# Business English
+
+## Professional Communication
+1. Email Writing
+   - Formal greetings
+   - Clear subject lines
+   - Professional tone
+   - Proper closing
+
+2. Meetings
+   - Setting agendas
+   - Leading discussions
+   - Taking minutes
+   - Following up
+
+3. Presentations
+   - Structuring content
+   - Using visual aids
+   - Handling questions
+   - Managing time
+
+## Common Business Phrases
+- Let's get down to business
+- I'd like to propose...
+- Could you elaborate on that?
+- Let's touch base next week
+
+## Practice Exercises
+1. Write a business proposal
+2. Create a meeting agenda
+3. Prepare a presentation
+4. Role-play a negotiation
+''',
+      ),
+      CourseLesson(
+        id: 'eng_adv_1_4',
+        title: 'Academic Writing',
+        description:
+            'Develop skills for writing academic papers and formal documents.',
+        vocabulary: [
+          'Thesis',
+          'Argument',
+          'Evidence',
+          'Citation',
+          'Analysis',
+          'Conclusion',
+          'Methodology',
+          'Literature review',
+          'Abstract',
+          'References'
+        ],
+        grammarPoints: [
+          'Academic style',
+          'Citation formats',
+          'Formal language',
+          'Complex sentence structures'
+        ],
+        exercises: [
+          'Write an academic abstract',
+          'Create a literature review',
+          'Practice proper citation',
+          'Develop a research proposal'
+        ],
+        audioUrl: 'assets/audio/eng_adv_1_4.mp3',
+        videoUrl: 'assets/video/eng_adv_1_4.mp4',
+        notes: '''
+# Academic Writing
+
+## Structure of Academic Papers
+1. Abstract
+2. Introduction
+3. Literature Review
+4. Methodology
+5. Results
+6. Discussion
+7. Conclusion
+8. References
+
+## Academic Style
+- Use formal language
+- Avoid contractions
+- Use passive voice appropriately
+- Maintain objectivity
+
+## Citation Styles
+- APA
+- MLA
+- Chicago
+- Harvard
+
+## Practice Exercises
+1. Write an abstract for a research paper
+2. Create a literature review outline
+3. Practice proper citation
+4. Develop a research proposal
 ''',
       ),
     ],
   ),
-]; 
+];

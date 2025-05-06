@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "427439703133-9nhr7pac9ule01h663bjffft1alfq7vn.apps.googleusercontent.com",
+          "client_id": "427439703133-36t1orof8snl1sgl8n4g7ben7ll7t853.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.languageapp.easy_talk",
-            "certificate_hash": "d28c545b6a08667a124a71717009e8574a28a93e"
+            "certificate_hash": "753ce2f20529fe887950af01e60e4d45677430d9"
           }
         },
         {

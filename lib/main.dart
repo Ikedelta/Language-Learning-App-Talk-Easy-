@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:easy_talk/services/auth_service.dart';
 import 'package:easy_talk/services/course_content_service.dart';
+import 'package:provider/provider.dart';
+import 'package:easy_talk/services/course_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,10 +24,18 @@ void main() async {
   final authService = AuthService();
   final user = authService.currentUser;
 
-  runApp(MyApp(
-    isDarkMode: isDarkMode,
-    initialRoute: user != null ? '/home' : '/splash',
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<CourseService>(create: (_) => CourseService()),
+        // Add other providers here if needed
+      ],
+      child: MyApp(
+        isDarkMode: isDarkMode,
+        initialRoute: user != null ? '/home' : '/splash',
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {

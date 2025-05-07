@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:easy_talk/screens/splash/splash_screen_two.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_service.dart';
+import '../onboarding/onboarding_screen.dart';
+import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  final Function() toggleTheme;
-
-  const SplashScreen({
-    super.key,
-    required this.toggleTheme,
-  });
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -30,28 +28,47 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeIn,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
       ),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Curves.easeOutBack,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
       ),
     );
 
     _controller.forward();
-    _navigateToNextScreen();
+
+    // Navigate to appropriate screen after animation
+    Future.delayed(const Duration(seconds: 3), () {
+      _navigateToNextScreen();
+    });
   }
 
-  void _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 3));
-    if (mounted) {
+  Future<void> _navigateToNextScreen() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final isFirstTime = await _checkIfFirstTime();
+
+    if (!mounted) return;
+
+    if (isFirstTime) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SplashScreenTwo()),
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
       );
+    } else if (authService.currentUser != null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    } else {
+      Navigator.of(context).pushReplacementNamed('/login');
     }
+  }
+
+  Future<bool> _checkIfFirstTime() async {
+    // TODO: Implement first-time check using SharedPreferences
+    return true; // For now, always show onboarding
   }
 
   @override
@@ -63,37 +80,59 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: FadeTransition(
-        opacity: _fadeAnimation,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primary,
+              Theme.of(context).colorScheme.secondary,
+            ],
+          ),
+        ),
         child: Center(
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.language,
-                  size: 100,
-                  color: Colors.white,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'EasyTalk',
-                  style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              return FadeTransition(
+                opacity: _fadeAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.chat_bubble_outline,
+                        size: 100,
+                        color: Theme.of(context).colorScheme.onPrimary,
                       ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Learn Languages with AI',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white70,
+                      const SizedBox(height: 24),
+                      Text(
+                        'Talk Easy',
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Learn languages through conversation',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

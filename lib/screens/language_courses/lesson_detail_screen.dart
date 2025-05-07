@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:easy_talk/models/language_course.dart';
+import 'package:easy_talk/models/course_level.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:video_player/video_player.dart';
 import '../../services/course_progress_service.dart';
 import 'quiz_screen.dart';
 
 class LessonDetailScreen extends StatefulWidget {
-  final CourseLesson lesson;
+  final Lesson lesson;
   final String courseId;
 
   const LessonDetailScreen({
@@ -23,9 +23,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
   late VideoPlayerController _videoController;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isPlaying = false;
-  bool _hasError = false;
+  final bool _hasError = false;
   String? _errorMessage;
-  bool _isVideoInitialized = false;
+  final bool _isVideoInitialized = false;
   double _lessonProgress = 0.0;
   final CourseProgressService _progressService = CourseProgressService();
 
@@ -186,7 +186,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                   MaterialPageRoute(
                     builder: (context) => QuizScreen(
                       lessonId: widget.lesson.id,
-                      userId: 'current_user', // Replace with actual user ID
+                      language:
+                          'english', // You should pass the actual language
+                      levelId: widget.courseId,
                     ),
                   ),
                 );

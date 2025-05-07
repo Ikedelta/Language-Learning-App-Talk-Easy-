@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_talk/services/speech_service.dart';
+import 'dart:typed_data';
+import 'package:record/record.dart';
+import 'dart:io';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -20,6 +25,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
   // and not hardcoded in the source code. Consider using environment variables
   // or a backend server to handle API calls.
   final String _apiKey = 'AIzaSyBgM0LutJvHpPJwMOdFTiMdnNYiMJYH2sA';
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final SpeechService _speechService = SpeechService();
+  int? _playingIndex;
+  bool _isTtsLoading = false;
+  bool _isSttLoading = false;
+  final AudioRecorder _recorder = AudioRecorder();
+  String? _recordedPath;
 
   @override
   void initState() {
@@ -75,21 +87,65 @@ class _AIChatScreenState extends State<AIChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
-  void _startListening() {
-    // TODO: Implement speech recognition later
-    setState(() {
-      _isListening = true;
-    });
+  Future<void> startRecording() async {
+    final hasPermission = await _recorder.hasPermission();
+    if (!hasPermission) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Microphone permission is required!')),
+      );
+      return;
+    }
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.wav), // Use wav for STT
+      path: 'audio_${DateTime.now().millisecondsSinceEpoch}.wav',
+    );
   }
 
-  void _stopListening() {
-    // TODO: Implement speech recognition stop later
+  Future<String?> stopRecording() async {
+    final path = await _recorder.stop();
+    return path;
+  }
+
+  Future<void> _startListening() async {
+    setState(() {
+      _isListening = true;
+      _isSttLoading = true;
+    });
+    try {
+      await startRecording();
+    } catch (e) {
+      setState(() {
+        _isListening = false;
+        _isSttLoading = false;
+      });
+    }
+  }
+
+  Future<void> _stopListening() async {
     setState(() {
       _isListening = false;
     });
+    try {
+      final path = await stopRecording();
+      if (path != null) {
+        final file = File(path);
+        final audioBytes = await file.readAsBytes();
+        final recognizedText = await _speechService.speechToText(audioBytes);
+        if (recognizedText != null && recognizedText.isNotEmpty) {
+          _messageController.text = recognizedText;
+        }
+      }
+    } catch (e) {
+      // Optionally show error
+    } finally {
+      setState(() {
+        _isSttLoading = false;
+      });
+    }
   }
 
   void _sendMessage() async {
@@ -124,6 +180,39 @@ class _AIChatScreenState extends State<AIChatScreen> {
     }
   }
 
+  Future<void> _playTts(ChatMessage message, int index) async {
+    setState(() {
+      _playingIndex = index;
+      _isTtsLoading = true;
+    });
+    try {
+      final audioBytes = await _speechService.textToSpeech(message.text);
+      if (audioBytes != null) {
+        await _audioPlayer.play(BytesSource(Uint8List.fromList(audioBytes)));
+      }
+    } catch (e) {
+      // Optionally show error
+    } finally {
+      setState(() {
+        _playingIndex = null;
+        _isTtsLoading = false;
+      });
+    }
+  }
+
+  void _onMicPressed() async {
+    if (_isListening) {
+      print('Stopping recording...');
+      await _stopListening();
+    } else {
+      print('Starting recording...');
+      await _startListening();
+    }
+    setState(() {
+      _isListening = !_isListening;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,6 +245,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 ],
               ),
             ),
+          if (_isSttLoading) const LinearProgressIndicator(minHeight: 2),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -164,9 +254,9 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 final message = _messages[index];
                 return _ChatBubble(
                   message: message,
-                  onPlay: () {
-                    // TODO: Implement text-to-speech later
-                  },
+                  onPlay:
+                      message.isUser ? null : () => _playTts(message, index),
+                  isPlaying: _playingIndex == index && _isTtsLoading,
                 );
               },
             ),
@@ -190,9 +280,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                     _isListening ? Icons.mic : Icons.mic_none,
                     color: _isListening ? Colors.red : null,
                   ),
-                  onPressed: _isOffline
-                      ? null
-                      : (_isListening ? _stopListening : _startListening),
+                  onPressed: _isOffline ? null : _onMicPressed,
                 ),
                 Expanded(
                   child: TextField(
@@ -247,11 +335,13 @@ class ChatMessage {
 
 class _ChatBubble extends StatelessWidget {
   final ChatMessage message;
-  final VoidCallback onPlay;
+  final VoidCallback? onPlay;
+  final bool isPlaying;
 
   const _ChatBubble({
     required this.message,
-    required this.onPlay,
+    this.onPlay,
+    this.isPlaying = false,
   });
 
   @override
@@ -299,17 +389,23 @@ class _ChatBubble extends StatelessWidget {
                         : Colors.grey[600],
                   ),
                 ),
-                if (!message.isUser) ...[
+                if (!message.isUser && onPlay != null) ...[
                   const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.play_arrow, size: 20),
-                    onPressed: onPlay,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(
-                      minWidth: 20,
-                      minHeight: 20,
-                    ),
-                  ),
+                  isPlaying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : IconButton(
+                          icon: const Icon(Icons.play_arrow, size: 20),
+                          onPressed: onPlay,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 20,
+                            minHeight: 20,
+                          ),
+                        ),
                 ],
               ],
             ),

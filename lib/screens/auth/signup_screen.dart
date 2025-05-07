@@ -2,18 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:easy_talk/screens/home/home_screen.dart';
 import 'package:easy_talk/services/auth_service.dart';
 import 'package:easy_talk/services/logger_service.dart';
-import 'package:easy_talk/services/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class SignupScreen extends StatefulWidget {
-  final Function() toggleTheme;
-
-  const SignupScreen({
-    super.key,
-    required this.toggleTheme,
-  });
+  const SignupScreen({super.key});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -26,7 +18,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
-  final _googleSignInService = GoogleSignInService();
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
@@ -69,9 +60,7 @@ class _SignupScreenState extends State<SignupScreen> {
       if (userCredential?.user != null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (context) =>
-                    HomeScreen(toggleTheme: widget.toggleTheme)),
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
         }
       }
@@ -124,13 +113,13 @@ class _SignupScreenState extends State<SignupScreen> {
     try {
       Logger.debug('Starting Google Sign In process');
 
-      final userCredential = await _googleSignInService.signInWithGoogle();
+      final userCredential = await _authService.signInWithGoogle();
 
-      if (userCredential?.user != null) {
+      if (userCredential.user != null) {
         if (mounted) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
-              builder: (context) => HomeScreen(toggleTheme: widget.toggleTheme),
+              builder: (context) => const HomeScreen(),
             ),
           );
         }

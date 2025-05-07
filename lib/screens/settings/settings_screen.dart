@@ -1,249 +1,215 @@
 import 'package:flutter/material.dart';
-import 'package:easy_talk/screens/auth/login_screen.dart';
-import 'package:easy_talk/screens/settings/edit_profile_screen.dart';
-import 'package:easy_talk/screens/settings/change_password_screen.dart';
-import 'package:easy_talk/screens/settings/privacy_policy_screen.dart';
-import 'package:easy_talk/screens/settings/terms_of_service_screen.dart';
-import 'package:easy_talk/services/auth_service.dart';
-import 'package:easy_talk/services/google_sign_in.dart';
-import 'package:easy_talk/services/logger_service.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/auth_service.dart';
+import '../../services/theme_service.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final Function() toggleTheme;
-
-  const SettingsScreen({
-    super.key,
-    required this.toggleTheme,
-  });
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final _authService = AuthService();
-  final _googleSignInService = GoogleSignInService();
-  bool _notifications = true;
-  bool _soundEffects = true;
-  String _selectedVoice = 'Default';
+  final AuthService _authService = AuthService();
+  bool _notificationsEnabled = true;
+  bool _soundEnabled = true;
+  String _selectedLanguage = 'English';
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+      _soundEnabled = prefs.getBool('sound_enabled') ?? true;
+      _selectedLanguage = prefs.getString('selected_language') ?? 'English';
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', _notificationsEnabled);
+    await prefs.setBool('sound_enabled', _soundEnabled);
+    await prefs.setString('selected_language', _selectedLanguage);
+  }
 
   Future<void> _signOut() async {
+    setState(() => _isLoading = true);
     try {
-      Logger.debug('Starting sign out process');
-
-      // Sign out from Google Sign In
-      await _googleSignInService.signOut();
-
-      // Sign out from Firebase Auth
       await _authService.signOut();
-
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => LoginScreen(toggleTheme: widget.toggleTheme),
+        Navigator.of(context).pushReplacementNamed('/login');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error signing out. Please try again.'),
+            duration: Duration(seconds: 3),
           ),
         );
       }
-    } catch (e, stackTrace) {
-      Logger.error('Sign out error', e, stackTrace);
+    } finally {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error signing out: ${e.toString()}'),
-            duration: const Duration(seconds: 5),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeService = Provider.of<ThemeService>(context);
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          const SliverAppBar.large(
-            title: Text('Settings'),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
               children: [
+                const SizedBox(height: 16),
                 _buildSection(
-                  title: 'Appearance',
-                  children: [
+                  'Appearance',
+                  [
                     SwitchListTile(
                       title: const Text('Dark Mode'),
-                      value: isDarkMode,
-                      onChanged: (value) {
-                        widget.toggleTheme();
-                      },
+                      value: themeService.isDarkMode,
+                      onChanged: (value) => themeService.toggleTheme(),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
                 _buildSection(
-                  title: 'Notifications',
-                  children: [
+                  'Notifications',
+                  [
                     SwitchListTile(
-                      title: const Text('Push Notifications'),
-                      value: _notifications,
+                      title: const Text('Enable Notifications'),
+                      value: _notificationsEnabled,
                       onChanged: (value) {
-                        setState(() {
-                          _notifications = value;
-                        });
+                        setState(() => _notificationsEnabled = value);
+                        _saveSettings();
                       },
                     ),
+                  ],
+                ),
+                _buildSection(
+                  'Sound',
+                  [
                     SwitchListTile(
-                      title: const Text('Sound Effects'),
-                      value: _soundEffects,
+                      title: const Text('Enable Sound'),
+                      value: _soundEnabled,
                       onChanged: (value) {
-                        setState(() {
-                          _soundEffects = value;
-                        });
+                        setState(() => _soundEnabled = value);
+                        _saveSettings();
                       },
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
                 _buildSection(
-                  title: 'Voice',
-                  children: [
+                  'Language',
+                  [
                     ListTile(
-                      title: const Text('Voice Selection'),
-                      trailing: DropdownButton<String>(
-                        value: _selectedVoice,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'Default',
-                            child: Text('Default'),
+                      title: const Text('Learning Language'),
+                      subtitle: Text(_selectedLanguage),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Select Language'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                _buildLanguageOption('English'),
+                                _buildLanguageOption('Spanish'),
+                                _buildLanguageOption('French'),
+                                _buildLanguageOption('German'),
+                                _buildLanguageOption('Japanese'),
+                              ],
+                            ),
                           ),
-                          DropdownMenuItem(
-                            value: 'Male',
-                            child: Text('Male'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'Female',
-                            child: Text('Female'),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() {
-                              _selectedVoice = value;
-                            });
-                          }
-                        },
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
                 _buildSection(
-                  title: 'Account',
-                  children: [
+                  'Account',
+                  [
                     ListTile(
-                      leading: const Icon(Icons.person),
                       title: const Text('Edit Profile'),
+                      leading: const Icon(Icons.person),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EditProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/edit-profile');
                       },
                     ),
                     ListTile(
-                      leading: const Icon(Icons.lock),
-                      title: const Text('Change Password'),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ChangePasswordScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
                       title: const Text('Sign Out'),
-                      onTap: () {
-                        _signOut();
-                      },
+                      leading: const Icon(Icons.logout),
+                      onTap: _signOut,
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
                 _buildSection(
-                  title: 'About',
-                  children: [
-                    const ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: Text('Version'),
-                      trailing: Text('1.0.0'),
+                  'About',
+                  [
+                    ListTile(
+                      title: const Text('Version'),
+                      subtitle: const Text('1.0.0'),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.description_outlined),
-                      title: const Text('Privacy Policy'),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PrivacyPolicyScreen(),
-                          ),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.gavel_outlined),
                       title: const Text('Terms of Service'),
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const TermsOfServiceScreen(),
-                          ),
-                        );
+                        // Navigate to terms of service
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('Privacy Policy'),
+                      onTap: () {
+                        // Navigate to privacy policy
                       },
                     ),
                   ],
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-  }) {
+  Widget _buildSection(String title, List<Widget> children) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
           ),
         ),
-        const SizedBox(height: 8),
-        Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: children,
-          ),
-        ),
+        ...children,
+        const Divider(),
       ],
+    );
+  }
+
+  Widget _buildLanguageOption(String language) {
+    return ListTile(
+      title: Text(language),
+      onTap: () {
+        setState(() => _selectedLanguage = language);
+        _saveSettings();
+        Navigator.pop(context);
+      },
     );
   }
 }

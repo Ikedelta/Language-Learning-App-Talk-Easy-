@@ -1,102 +1,103 @@
 import 'package:flutter/material.dart';
-import 'package:easy_talk/screens/splash/splash_screen.dart';
-import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
-import 'package:easy_talk/screens/auth/login_screen.dart';
-import 'package:easy_talk/screens/auth/signup_screen.dart';
-import 'package:easy_talk/screens/home/home_screen.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:easy_talk/services/auth_service.dart';
-import 'package:easy_talk/services/course_content_service.dart';
-import 'package:provider/provider.dart';
-import 'package:easy_talk/services/course_service.dart';
+import 'services/theme_service.dart';
+import 'services/auth_service.dart';
+import 'screens/auth/login_screen.dart';
+import 'screens/home/home_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
+import 'screens/auth/signup_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Initialize course content
-  final courseService = CourseContentService();
-  await courseService.initializeDefaultCourses();
+  // Lock orientation to portrait mode
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
 
   final prefs = await SharedPreferences.getInstance();
-  final isDarkMode = prefs.getBool('isDarkMode') ?? false;
-  final authService = AuthService();
-  final user = authService.currentUser;
 
   runApp(
     MultiProvider(
       providers: [
-        Provider<CourseService>(create: (_) => CourseService()),
-        // Add other providers here if needed
+        ChangeNotifierProvider(
+          create: (_) => ThemeService(prefs),
+        ),
+        Provider<AuthService>(
+          create: (_) => AuthService(),
+        ),
       ],
-      child: MyApp(
-        isDarkMode: isDarkMode,
-        initialRoute: user != null ? '/home' : '/splash',
-      ),
+      child: const MyApp(),
     ),
   );
 }
 
-class MyApp extends StatefulWidget {
-  final bool isDarkMode;
-  final String initialRoute;
-
-  const MyApp({
-    super.key,
-    required this.isDarkMode,
-    required this.initialRoute,
-  });
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late bool _isDarkMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _isDarkMode = widget.isDarkMode;
-  }
-
-  void toggleTheme() async {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', _isDarkMode);
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context);
+    final authService = Provider.of<AuthService>(context);
+
     return MaterialApp(
-      title: 'Easy Talk',
+      title: 'Talk Easy',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
+      theme: themeService.lightTheme,
+      darkTheme: themeService.darkTheme,
+      themeMode: themeService.themeMode,
+      home: StreamBuilder(
+        stream: authService.authStateChanges,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: ThemeService.defaultPadding),
+                    Text(
+                      'Loading...',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          if (snapshot.hasData) {
+            return const HomeScreen();
+          }
+
+          return const LoginScreen();
+        },
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
-      themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      initialRoute: widget.initialRoute,
       routes: {
-        '/splash': (context) => SplashScreen(toggleTheme: toggleTheme),
-        '/login': (context) => LoginScreen(toggleTheme: toggleTheme),
-        '/home': (context) => HomeScreen(toggleTheme: toggleTheme),
-        '/signup': (context) => SignupScreen(toggleTheme: toggleTheme),
-        '/language-courses': (context) =>
-            const LanguageCoursesScreen(language: 'English'),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/forgot-password': (context) => const ForgotPasswordScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }

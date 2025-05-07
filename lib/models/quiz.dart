@@ -1,67 +1,83 @@
 class Quiz {
   final String id;
-  final String lessonId;
+  final String language;
+  final String level;
   final List<QuizQuestion> questions;
-  final int passingScore;
   final int timeLimit; // in minutes
+  final int passingScore;
 
   Quiz({
     required this.id,
-    required this.lessonId,
+    required this.language,
+    required this.level,
     required this.questions,
-    this.passingScore = 70,
-    this.timeLimit = 10,
+    required this.timeLimit,
+    required this.passingScore,
   });
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'lessonId': lessonId,
-        'questions': questions.map((q) => q.toJson()).toList(),
-        'passingScore': passingScore,
-        'timeLimit': timeLimit,
-      };
+  factory Quiz.fromJson(Map<String, dynamic> json) {
+    return Quiz(
+      id: json['id'] as String,
+      language: json['language'] as String,
+      level: json['level'] as String,
+      questions: (json['questions'] as List)
+          .map((q) => QuizQuestion.fromJson(q as Map<String, dynamic>))
+          .toList(),
+      timeLimit: json['timeLimit'] as int,
+      passingScore: json['passingScore'] as int,
+    );
+  }
 
-  factory Quiz.fromJson(Map<String, dynamic> json) => Quiz(
-        id: json['id'],
-        lessonId: json['lessonId'],
-        questions: (json['questions'] as List)
-            .map((q) => QuizQuestion.fromJson(q))
-            .toList(),
-        passingScore: json['passingScore'],
-        timeLimit: json['timeLimit'],
-      );
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'language': language,
+      'level': level,
+      'questions': questions.map((q) => q.toJson()).toList(),
+      'timeLimit': timeLimit,
+      'passingScore': passingScore,
+    };
+  }
 }
 
 class QuizQuestion {
   final String id;
   final String question;
   final List<String> options;
-  final int correctAnswerIndex;
+  final int correctOptionIndex;
   final String explanation;
+  final String type; // 'vocabulary', 'grammar', 'listening', etc.
 
   QuizQuestion({
     required this.id,
     required this.question,
     required this.options,
-    required this.correctAnswerIndex,
+    required this.correctOptionIndex,
     required this.explanation,
+    required this.type,
   });
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'question': question,
-        'options': options,
-        'correctAnswerIndex': correctAnswerIndex,
-        'explanation': explanation,
-      };
+  factory QuizQuestion.fromJson(Map<String, dynamic> json) {
+    return QuizQuestion(
+      id: json['id'] as String,
+      question: json['question'] as String,
+      options: List<String>.from(json['options'] as List),
+      correctOptionIndex: json['correctOptionIndex'] as int,
+      explanation: json['explanation'] as String,
+      type: json['type'] as String,
+    );
+  }
 
-  factory QuizQuestion.fromJson(Map<String, dynamic> json) => QuizQuestion(
-        id: json['id'],
-        question: json['question'],
-        options: List<String>.from(json['options']),
-        correctAnswerIndex: json['correctAnswerIndex'],
-        explanation: json['explanation'],
-      );
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'question': question,
+      'options': options,
+      'correctOptionIndex': correctOptionIndex,
+      'explanation': explanation,
+      'type': type,
+    };
+  }
 }
 
 class QuizResult {
@@ -130,4 +146,24 @@ class QuestionResult {
         isCorrect: json['isCorrect'],
         explanation: json['explanation'],
       );
+}
+
+class QuizAttempt {
+  final String quizId;
+  final String userId;
+  final DateTime startTime;
+  final DateTime? endTime;
+  final List<int> selectedAnswers;
+  final int score;
+  final bool passed;
+
+  QuizAttempt({
+    required this.quizId,
+    required this.userId,
+    required this.startTime,
+    this.endTime,
+    required this.selectedAnswers,
+    required this.score,
+    required this.passed,
+  });
 }

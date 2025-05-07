@@ -1,198 +1,229 @@
 import 'package:flutter/material.dart';
-import '../../models/quiz.dart';
-import '../../services/quiz_service.dart';
+import '../../models/course_level.dart';
+import '../../services/course_service.dart';
+import '../../services/auth_service.dart';
 
 class QuizScreen extends StatefulWidget {
   final String lessonId;
-  final String userId;
+  final String language;
+  final String levelId;
 
   const QuizScreen({
-    Key? key,
+    super.key,
     required this.lessonId,
-    required this.userId,
-  }) : super(key: key);
+    required this.language,
+    required this.levelId,
+  });
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  late Quiz _quiz;
-  int _currentQuestionIndex = 0;
-  int? _selectedAnswerIndex;
-  int _score = 0;
-  bool _isQuizCompleted = false;
-  late QuizService _quizService;
-  List<QuestionResult> _questionResults = [];
+  final CourseService _courseService = CourseService();
+  final AuthService _authService = AuthService();
+  Lesson? _lesson;
   bool _isLoading = true;
+  int _currentExerciseIndex = 0;
+  String? _selectedAnswer;
+  bool _showExplanation = false;
+  int _score = 0;
 
   @override
   void initState() {
     super.initState();
-    _quizService = QuizService();
-    _initializeQuiz();
+    _loadLesson();
   }
 
-  Future<void> _initializeQuiz() async {
-    await _quizService.init();
-    final quiz = _quizService.getQuizForLesson(widget.lessonId);
-    if (quiz != null) {
+  Future<void> _loadLesson() async {
+    try {
+      final lesson = await _courseService.getLesson(
+        widget.language,
+        widget.levelId,
+        widget.lessonId,
+      );
       setState(() {
-        _quiz = quiz;
+        _lesson = lesson;
         _isLoading = false;
       });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error loading lesson: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+      setState(() => _isLoading = false);
     }
   }
 
-  void _submitAnswer() {
-    if (_selectedAnswerIndex == null) return;
-
-    final isCorrect = _selectedAnswerIndex ==
-        _quiz.questions[_currentQuestionIndex].correctAnswerIndex;
-    if (isCorrect) {
-      setState(() {
-        _score++;
-      });
-    }
-
-    _questionResults.add(QuestionResult(
-      questionId: _quiz.questions[_currentQuestionIndex].id,
-      selectedAnswerIndex: _selectedAnswerIndex!,
-      isCorrect: isCorrect,
-      explanation: _quiz.questions[_currentQuestionIndex].explanation,
-    ));
-
-    if (_currentQuestionIndex < _quiz.questions.length - 1) {
-      setState(() {
-        _currentQuestionIndex++;
-        _selectedAnswerIndex = null;
-      });
-    } else {
-      _completeQuiz();
-    }
-  }
-
-  Future<void> _completeQuiz() async {
-    final result = QuizResult(
-      quizId: _quiz.id,
-      userId: widget.userId,
-      score: _score,
-      totalQuestions: _quiz.questions.length,
-      completedAt: DateTime.now(),
-      questionResults: _questionResults,
-    );
-
-    await _quizService.saveQuizResult(result);
+  void _handleAnswer(String answer) {
     setState(() {
-      _isQuizCompleted = true;
+      _selectedAnswer = answer;
+      _showExplanation = true;
+      if (answer == _currentExercise.correctAnswer) {
+        _score++;
+      }
     });
   }
+
+  void _nextExercise() {
+    if (_currentExerciseIndex < _lesson!.exercises.length - 1) {
+      setState(() {
+        _currentExerciseIndex++;
+        _selectedAnswer = null;
+        _showExplanation = false;
+      });
+    } else {
+      _completeLesson();
+    }
+  }
+
+  Future<void> _completeLesson() async {
+    try {
+      final user = _authService.currentUser;
+      if (user != null) {
+        await _courseService.completeLesson(
+          user.uid,
+          widget.language,
+          widget.levelId,
+          widget.lessonId,
+        );
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error completing lesson: $e'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  Exercise get _currentExercise => _lesson!.exercises[_currentExerciseIndex];
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    if (_isQuizCompleted) {
-      return _buildResultsScreen();
-    }
-
-    if (_quiz.questions.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Text('No questions available for this quiz.'),
+    if (_lesson == null) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(
+          child: Text('Lesson not found'),
         ),
       );
     }
-
-    final currentQuestion = _quiz.questions[_currentQuestionIndex];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            'Quiz - Question ${_currentQuestionIndex + 1}/${_quiz.questions.length}'),
+        title: Text(_lesson!.title),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             LinearProgressIndicator(
-              value: (_currentQuestionIndex + 1) / _quiz.questions.length,
+              value: (_currentExerciseIndex + 1) / _lesson!.exercises.length,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Text(
-              currentQuestion.question,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 20),
-            ...currentQuestion.options.asMap().entries.map((entry) {
-              final index = entry.key;
-              final option = entry.value;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ElevatedButton(
-                  onPressed: _selectedAnswerIndex == null
-                      ? () => setState(() => _selectedAnswerIndex = index)
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _selectedAnswerIndex == index
-                        ? Theme.of(context).colorScheme.primary
-                        : null,
-                  ),
-                  child: Text(option),
-                ),
-              );
-            }).toList(),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _selectedAnswerIndex == null ? null : _submitAnswer,
-              child: const Text('Submit Answer'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResultsScreen() {
-    final percentage = (_score / _quiz.questions.length * 100).round();
-    final isPassed = percentage >= _quiz.passingScore;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz Results'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isPassed ? Icons.check_circle : Icons.cancel,
-              color: isPassed ? Colors.green : Colors.red,
-              size: 100,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Your Score: $percentage%',
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'You got $_score out of ${_quiz.questions.length} questions correct.',
+              'Exercise ${_currentExerciseIndex + 1} of ${_lesson!.exercises.length}',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Back to Lesson'),
+            const SizedBox(height: 24),
+            Text(
+              _currentExercise.question,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
+            const SizedBox(height: 24),
+            ..._currentExercise.options.map((option) {
+              final isSelected = option == _selectedAnswer;
+              final isCorrect = option == _currentExercise.correctAnswer;
+              final showResult = _showExplanation && isSelected;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ElevatedButton(
+                  onPressed:
+                      _showExplanation ? null : () => _handleAnswer(option),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: showResult
+                        ? isCorrect
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1)
+                        : null,
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          option,
+                          style: TextStyle(
+                            color: showResult
+                                ? isCorrect
+                                    ? Colors.green
+                                    : Colors.red
+                                : null,
+                          ),
+                        ),
+                      ),
+                      if (showResult)
+                        Icon(
+                          isCorrect ? Icons.check_circle : Icons.cancel,
+                          color: isCorrect ? Colors.green : Colors.red,
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+            if (_showExplanation) ...[
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Explanation',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(_currentExercise.explanation),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _nextExercise,
+                child: Text(
+                  _currentExerciseIndex < _lesson!.exercises.length - 1
+                      ? 'Next Exercise'
+                      : 'Complete Lesson',
+                ),
+              ),
+            ],
           ],
         ),
       ),

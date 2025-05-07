@@ -5,10 +5,12 @@ final List<LanguageCourse> spanishCourses = [
     id: 'spa_beg_1',
     title: 'Español para Principiantes',
     description:
-        'Comienza tu viaje de aprendizaje del español con vocabulario y gramática básicos. Perfecto para principiantes absolutos.',
+        'Comienza tu viaje de aprendizaje del español con vocabulario básico y gramática.',
     level: 'Beginner',
     language: 'Spanish',
     imageUrl: 'assets/images/spanish_beginner.jpg',
+    prerequisites: [],
+    requiredScore: 0,
     lessons: [
       CourseLesson(
         id: 'spa_beg_1_1',
@@ -19,16 +21,17 @@ final List<LanguageCourse> spanishCourses = [
           'Buenos días',
           'Buenas tardes',
           'Buenas noches',
+          '¿Cómo estás?',
           'Me llamo...',
           'Mucho gusto',
-          '¿Cómo estás?',
-          'Estoy bien, gracias',
-          'Adiós'
+          '¿Y tú?',
+          'Gracias',
+          'De nada'
         ],
         grammarPoints: [
+          'Pronombres personales (yo, tú, él, ella)',
+          'Verbo "ser" en presente',
           'Estructura básica de oraciones',
-          'Pronombres personales',
-          'Presente simple',
           'Formación de preguntas'
         ],
         exercises: [
@@ -43,9 +46,10 @@ final List<LanguageCourse> spanishCourses = [
 # Saludos y Presentaciones
 
 ## Saludos Básicos
-- Hola / Buenos días (antes del mediodía)
-- Buenas tardes (mediodía - 6pm)
-- Buenas noches (después de las 6pm)
+- Hola
+- Buenos días (mañana)
+- Buenas tardes (tarde)
+- Buenas noches (noche)
 
 ## Presentaciones
 1. Comienza con un saludo
@@ -58,17 +62,6 @@ final List<LanguageCourse> spanishCourses = [
 - Estoy bien, gracias
 - ¿Y tú?
 - Adiós / Hasta luego
-
-## Diálogos de Práctica
-1. Presentación Formal:
-   A: Buenos días. Me llamo Juan.
-   B: Buenos días, Juan. Soy María. Mucho gusto.
-   A: Mucho gusto también.
-
-2. Presentación Informal:
-   A: ¡Hola! Soy Miguel.
-   B: ¡Hola Miguel! Soy Laura.
-   A: Mucho gusto, Laura.
 ''',
       ),
       CourseLesson(
@@ -91,7 +84,7 @@ final List<LanguageCourse> spanishCourses = [
           'Preposiciones de tiempo'
         ],
         exercises: [
-          'Practicar contar del 1-100',
+          'Practicar contar del 1 al 100',
           'Escribir la fecha en español',
           'Decir la hora en diferentes formatos',
           'Crear un horario diario'
@@ -127,7 +120,9 @@ final List<LanguageCourse> spanishCourses = [
 - ¿Qué hora es?
 - Es la una
 - Son las [hora]
-- AM/PM
+- Es la una y media
+- Son las [hora] y cuarto
+- Son las [hora] menos cuarto
 
 ## Días de la Semana
 - Lunes
@@ -151,12 +146,6 @@ final List<LanguageCourse> spanishCourses = [
 - Octubre
 - Noviembre
 - Diciembre
-
-## Ejercicios de Práctica
-1. Escribir la fecha de hoy
-2. Decir la hora actual
-3. Crear un horario semanal
-4. Practicar contar dinero
 ''',
       ),
       CourseLesson(
@@ -330,69 +319,65 @@ Incontable:
     id: 'spa_int_1',
     title: 'Español Intermedio',
     description:
-        'Desarrolla tus habilidades básicas de español con gramática y vocabulario más complejos.',
+        'Mejora tu español con conceptos más avanzados de gramática y vocabulario.',
     level: 'Intermediate',
     language: 'Spanish',
     imageUrl: 'assets/images/spanish_intermediate.jpg',
+    prerequisites: ['spa_beg_1'],
+    requiredScore: 70,
     lessons: [
       CourseLesson(
         id: 'spa_int_1_1',
         title: 'Tiempos Pasados',
         description:
-            'Aprende a hablar sobre eventos pasados usando diferentes tiempos verbales.',
+            'Aprende a usar los diferentes tiempos pasados en español.',
         vocabulary: [
-          'Verbos regulares',
-          'Verbos irregulares',
-          'Expresiones de tiempo',
-          'Palabras de secuencia'
+          'Ayer',
+          'La semana pasada',
+          'El mes pasado',
+          'El año pasado',
+          'Antes',
+          'Después',
+          'Durante',
+          'Mientras'
         ],
         grammarPoints: [
-          'Pretérito perfecto simple',
+          'Pretérito perfecto',
           'Pretérito imperfecto',
           'Pretérito pluscuamperfecto',
-          'Usado para + infinitivo'
+          'Diferencias entre tiempos pasados'
         ],
         exercises: [
-          'Escribir sobre tus últimas vacaciones',
-          'Describir un recuerdo de la infancia',
+          'Escribir sobre tus vacaciones pasadas',
+          'Describir tu infancia',
           'Contar una historia usando diferentes tiempos pasados',
-          'Practicar formas de verbos irregulares'
+          'Practicar conjugaciones de verbos irregulares'
         ],
         audioUrl: 'assets/audio/spa_int_1_1.mp3',
         videoUrl: 'assets/video/spa_int_1_1.mp4',
         notes: '''
 # Tiempos Pasados
 
-## Pretérito Perfecto Simple
+## Pretérito Perfecto
 Usado para acciones completadas en el pasado.
 
-### Verbos Regulares
-- Añadir -é, -aste, -ó, -amos, -asteis, -aron
-- Ejemplo: caminar → caminé, caminaste, caminó
-
-### Verbos Irregulares
-- Deben ser memorizados
-- Ejemplo: ir → fui, fuiste, fue
+### Estructura
+- Haber (presente) + participio pasado
+- Ejemplo: He terminado mi tarea
 
 ## Pretérito Imperfecto
 Usado para acciones en progreso en el pasado.
 
 ### Estructura
-- Sujeto + estaba/estabas + verbo-ing
-- Ejemplo: Yo estaba estudiando cuando llamaste.
+- Raíz + terminaciones -aba/-ía
+- Ejemplo: Estudiaba cuando llamaste
 
 ## Pretérito Pluscuamperfecto
 Usado para acciones completadas antes de otra acción pasada.
 
 ### Estructura
-- Sujeto + había + participio pasado
-- Ejemplo: Yo había terminado mi tarea antes de la cena.
-
-## Ejercicios de Práctica
-1. Escribir una entrada de diario sobre ayer
-2. Describir lo que estabas haciendo en momentos específicos
-3. Contar una historia usando todos los tiempos pasados
-4. Practicar formas de verbos irregulares
+- Haber (imperfecto) + participio pasado
+- Ejemplo: Había terminado cuando llegaste
 ''',
       ),
       CourseLesson(
@@ -456,6 +441,69 @@ Usado para situaciones hipotéticas pasadas.
 2. Role-play de diferentes escenarios
 3. Escribir sobre tus sueños y deseos
 4. Discutir posibles escenarios futuros
+''',
+      ),
+    ],
+  ),
+  LanguageCourse(
+    id: 'spa_adv_1',
+    title: 'Español Avanzado',
+    description:
+        'Domina el español con estructuras gramaticales complejas y vocabulario avanzado.',
+    level: 'Advanced',
+    language: 'Spanish',
+    imageUrl: 'assets/images/spanish_advanced.jpg',
+    prerequisites: ['spa_int_1'],
+    requiredScore: 80,
+    lessons: [
+      CourseLesson(
+        id: 'spa_adv_1_1',
+        title: 'Subjuntivo',
+        description: 'Aprende a usar el modo subjuntivo en español.',
+        vocabulary: [
+          'Ojalá',
+          'Espero que',
+          'Dudo que',
+          'No creo que',
+          'Es posible que',
+          'Es probable que'
+        ],
+        grammarPoints: [
+          'Presente de subjuntivo',
+          'Imperfecto de subjuntivo',
+          'Pluscuamperfecto de subjuntivo',
+          'Usos del subjuntivo'
+        ],
+        exercises: [
+          'Expresar deseos usando subjuntivo',
+          'Escribir oraciones condicionales',
+          'Practicar conjugaciones del subjuntivo',
+          'Crear oraciones complejas'
+        ],
+        audioUrl: 'assets/audio/spa_adv_1_1.mp3',
+        videoUrl: 'assets/video/spa_adv_1_1.mp4',
+        notes: '''
+# Subjuntivo
+
+## Presente de Subjuntivo
+Usado para expresar deseos, dudas y emociones.
+
+### Estructura
+- Raíz + terminaciones -e/-es/-e/-emos/-éis/-en
+- Ejemplo: Espero que vengas a la fiesta
+
+## Imperfecto de Subjuntivo
+Usado en oraciones condicionales y subordinadas.
+
+### Estructura
+- Raíz + terminaciones -ra/-ras/-ra/-ramos/-rais/-ran
+- Ejemplo: Si tuviera dinero, viajaría
+
+## Usos del Subjuntivo
+1. Deseos y esperanzas
+2. Duda e incertidumbre
+3. Emociones y sentimientos
+4. Oraciones condicionales
 ''',
       ),
     ],

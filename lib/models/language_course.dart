@@ -6,6 +6,8 @@ class LanguageCourse {
   final List<CourseLesson> lessons;
   final String imageUrl;
   final String language;
+  final List<String> prerequisites; // IDs of courses that must be completed
+  final int requiredScore; // Minimum score required to unlock this level
 
   LanguageCourse({
     required this.id,
@@ -15,6 +17,8 @@ class LanguageCourse {
     required this.lessons,
     required this.imageUrl,
     required this.language,
+    this.prerequisites = const [],
+    this.requiredScore = 0,
   });
 }
 
@@ -40,4 +44,4 @@ class CourseLesson {
     required this.videoUrl,
     required this.notes,
   });
-} 
+}

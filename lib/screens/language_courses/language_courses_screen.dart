@@ -56,7 +56,9 @@ class _LanguageCoursesScreenState extends State<LanguageCoursesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.language} Courses'),
+        title: Text(widget.level == 'all'
+            ? 'All Courses'
+            : '${widget.language} Courses'),
         backgroundColor: theme.primaryColor,
       ),
       body: _isLoading
@@ -87,11 +89,19 @@ class _LanguageCoursesScreenState extends State<LanguageCoursesScreen> {
                   );
                 }
 
+                // Filter courses based on level if not 'all'
+                final filteredCourses = widget.level == 'all'
+                    ? courses
+                    : courses
+                        .where(
+                            (course) => course.level.toString() == widget.level)
+                        .toList();
+
                 return ListView.builder(
                   padding: const EdgeInsets.all(16),
-                  itemCount: courses.length,
+                  itemCount: filteredCourses.length,
                   itemBuilder: (context, index) {
-                    final course = courses[index];
+                    final course = filteredCourses[index];
                     final isEnrolled = _userProgress?['enrolledCourses']
                             ?.contains(course.id) ??
                         false;
@@ -128,6 +138,7 @@ class _LanguageCoursesScreenState extends State<LanguageCoursesScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(

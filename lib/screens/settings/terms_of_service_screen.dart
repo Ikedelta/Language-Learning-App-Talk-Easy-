@@ -15,7 +15,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Easy Talk: Terms of Service and Privacy Policy',
+              'Terms of Service for Easy Talk',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -23,7 +23,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Effective Date: 2025',
+              'Effective Date: March 15, 2024',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
@@ -31,71 +31,83 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             const Text(
-              'Welcome to Easy Talk! We are excited to support your language learning journey.\n'
-              'Before you start using our app, please read these Terms of Service ("Terms") and Privacy Policy ("Policy") carefully.\n'
-              'By accessing or using Easy Talk, you agree to be bound by these Terms and this Policy. If you do not agree, please do not use our Services.',
+              'Welcome to Easy Talk!\n\n'
+              'These Terms of Service ("Terms") govern your use of the Easy Talk mobile application ("App," "Service," or "Services"). By accessing or using Easy Talk, you agree to these Terms. If you do not agree, please do not use our Services.',
               style: TextStyle(height: 1.5),
             ),
             const SizedBox(height: 24),
             _buildSection(
-              title: '1. Use of Easy Talk',
-              content:
-                  'You must be at least 13 years old to use Easy Talk. By using the app, you affirm that you meet this age requirement. You are granted a limited, non-exclusive, non-transferable, and revocable license to use Easy Talk for personal, non-commercial, educational purposes only. You agree to use the app lawfully and responsibly.',
+              '1. Use of Easy Talk',
+              'You must be at least 13 years old to use Easy Talk. By using the app, you affirm that you meet this age requirement. You agree to use Easy Talk only for lawful purposes and in accordance with these Terms.\n\n'
+                  'We grant you a limited, non-exclusive, non-transferable, and revocable license to use Easy Talk for personal, non-commercial educational purposes only.',
             ),
             _buildSection(
-              title: '2. User Accounts',
-              content:
-                  'Some features require you to create an account. You must provide accurate, current information and maintain the confidentiality of your account credentials. You are responsible for all activities that occur under your account. We reserve the right to suspend or terminate your account if we suspect misuse or violation of these Terms.',
+              '2. User Accounts',
+              'To access certain features, you may be required to create an account. You agree to provide accurate, complete, and up-to-date information. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.\n\n'
+                  'We reserve the right to suspend or terminate your account if we suspect any unauthorized use or violation of these Terms.',
             ),
             _buildSection(
-              title: '3. Content and Intellectual Property',
-              content:
-                  'All materials in Easy Talk—including lessons, texts, graphics, audio clips, videos, and software—are owned or licensed by us and are protected by intellectual property laws. You may not reproduce, distribute, modify, or publicly display any materials without our written permission, except for personal educational use.',
+              '3. Content and Intellectual Property',
+              'All materials in Easy Talk—including text, graphics, audio clips, video lessons, and software—are owned or licensed by us and are protected by intellectual property laws.\n\n'
+                  'You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any material from Easy Talk without our prior written permission, except for personal and educational use.',
             ),
             _buildSection(
-              title: '4. User-Generated Content',
-              content:
-                  'By submitting any content (such as voice recordings, text responses, or feedback), you grant us a non-exclusive, worldwide, royalty-free license to use, modify, adapt, publish, and display your content solely to operate and improve Easy Talk. You are responsible for ensuring that your content does not violate the rights of others or any applicable law.',
+              '4. User-Generated Content',
+              'Easy Talk may allow you to submit content, such as voice recordings, text responses, or feedback.\n\n'
+                  'By submitting content, you grant us a non-exclusive, worldwide, royalty-free license to use, reproduce, modify, adapt, publish, and display such content for the purpose of operating and improving Easy Talk.\n\n'
+                  'You are responsible for the content you submit and must ensure it does not violate any third-party rights, applicable laws, or these Terms.',
             ),
             _buildSection(
-              title: '5. Prohibited Conduct',
-              content:
-                  'You agree not to misuse the app, upload malicious content, attempt unauthorized access, violate any law, or harass other users. Violations may result in immediate termination of your account.',
+              '5. Prohibited Conduct',
+              'You agree not to:\n\n'
+                  '• Use the Service for any unlawful or unauthorized purpose\n'
+                  '• Violate any local, state, national, or international law\n'
+                  '• Interfere with the security or functionality of Easy Talk\n'
+                  '• Upload viruses, malicious code, or attempt to gain unauthorized access to the Service\n'
+                  '• Harass, abuse, or harm other users\n\n'
+                  'Violation of these rules may result in immediate termination of your account.',
             ),
             _buildSection(
-              title: '6. Modifications to the Service',
-              content:
-                  'We may change or discontinue any part of Easy Talk at any time without notice. We are not liable for any such modifications.',
+              '6. Modifications to the Service',
+              'We may update, change, or discontinue any aspect of Easy Talk at any time without notice.\n\n'
+                  'We are not liable to you or any third party for any modification, suspension, or discontinuation of the Service.',
             ),
             _buildSection(
-              title: '7. Disclaimer of Warranties',
-              content:
-                  'Easy Talk is provided "as is" and "as available," without warranties of any kind. We do not guarantee uninterrupted or error-free service.',
+              '7. Disclaimer of Warranties',
+              'Easy Talk is provided "as is" and "as available" without warranties of any kind, either express or implied.\n\n'
+                  'We do not guarantee that Easy Talk will always be available, secure, error-free, or that it will meet your expectations.\n\n'
+                  'Use the Service at your own risk.',
             ),
             _buildSection(
-              title: '8. Limitation of Liability',
-              content:
-                  'To the fullest extent permitted by law, Easy Talk and its affiliates will not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Service.',
+              '8. Limitation of Liability',
+              'To the fullest extent permitted by law, Easy Talk and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, arising from your use of the Service.\n\n'
+                  'If we are found liable despite these limitations, our liability will not exceed the amount you paid us (if any) to use Easy Talk.',
             ),
             _buildSection(
-              title: '9. Indemnification',
-              content:
-                  'You agree to indemnify and hold harmless Easy Talk, its owners, affiliates, and service providers against any claims arising out of your use of the Service, your violation of these Terms, or your infringement of any rights.',
+              '9. Indemnification',
+              'You agree to indemnify, defend, and hold harmless Easy Talk, its owners, affiliates, and service providers from and against any claims, damages, obligations, losses, liabilities, and expenses arising from your use of the Service, your violation of these Terms, or your violation of any rights of another.',
             ),
             _buildSection(
-              title: '10. Termination',
-              content:
-                  'We may suspend or terminate your access to Easy Talk at any time, without notice, for any reason, including violation of these Terms.',
+              '10. Termination',
+              'We may terminate or suspend your access to Easy Talk at any time, without notice or liability, for any reason, including if you violate these Terms.\n\n'
+                  'Upon termination, your right to use the Service will immediately cease.',
             ),
             _buildSection(
-              title: '11. Governing Law',
-              content:
-                  'These Terms shall be governed by the laws of Ghana. Any disputes shall be resolved exclusively in the courts located in Ghana.',
+              '11. Governing Law',
+              'These Terms shall be governed and interpreted in accordance with the laws of the Republic of Ghana, without regard to its conflict of laws principles.\n\n'
+                  'Any disputes shall be resolved exclusively in the courts located in Ghana.',
             ),
             _buildSection(
-              title: '12. Changes to These Terms',
-              content:
-                  'We may revise these Terms at any time. Updated Terms will be posted with the revised "Effective Date." Continued use of Easy Talk constitutes your acceptance of the revised Terms.',
+              '12. Changes to These Terms',
+              'We reserve the right to update or modify these Terms at any time.\n\n'
+                  'When changes are made, we will update the "Effective Date" above and may provide additional notice (such as an in-app notification).\n\n'
+                  'By continuing to use Easy Talk after any revisions, you agree to be bound by the updated Terms.',
+            ),
+            _buildSection(
+              '13. Contact Us',
+              'If you have any questions or concerns about these Terms, please contact us at:\n\n'
+                  '📧 Email: easytalk@gmail.com\n'
+                  '🌐 Website: easygroup.com',
             ),
             const SizedBox(height: 24),
           ],
@@ -104,11 +116,10 @@ class TermsOfServiceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({required String title, required String content}) {
+  Widget _buildSection(String title, String content) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 16),
         Text(
           title,
           style: const TextStyle(
@@ -121,6 +132,7 @@ class TermsOfServiceScreen extends StatelessWidget {
           content,
           style: const TextStyle(height: 1.5),
         ),
+        const SizedBox(height: 24),
       ],
     );
   }

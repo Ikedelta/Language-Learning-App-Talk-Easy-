@@ -154,14 +154,62 @@ class CourseService {
     try {
       final snapshot = await _firestore
           .collection('courses')
-          .doc(language.toLowerCase())
-          .collection('levels')
+          .where('language', isEqualTo: language.toLowerCase())
           .orderBy('level')
           .get();
 
-      return snapshot.docs
-          .map((doc) => CourseLevel.fromJson(doc.data()))
-          .toList();
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        return CourseLevel(
+          id: doc.id,
+          name: data['title'] ?? data['name'] ?? '',
+          description: data['description'] ?? '',
+          level: data['level'] is int
+              ? data['level']
+              : _getLevelNumber(data['level']),
+          language: data['language'] ?? '',
+          imageUrl: data['imageUrl'] ?? '',
+          isLocked: data['isLocked'] ?? true,
+          requiredXp: data['requiredXp'] ?? 0,
+          lessons: (data['lessons'] as List?)?.map((lesson) {
+                return Lesson(
+                  id: lesson['id'] ?? '',
+                  title: lesson['title'] ?? '',
+                  description: lesson['description'] ?? '',
+                  vocabulary: List<String>.from(lesson['vocabulary'] ?? []),
+                  grammarPoints:
+                      List<String>.from(lesson['grammarPoints'] ?? []),
+                  exercises: (lesson['exercises'] as List?)?.map((exercise) {
+                        if (exercise is String) {
+                          return Exercise(
+                            id: const Uuid().v4(),
+                            type: 'text',
+                            question: exercise,
+                            options: [],
+                            correctAnswer: '',
+                            explanation: '',
+                          );
+                        }
+                        return Exercise(
+                          id: exercise['id'] ?? '',
+                          type: exercise['type'] ?? '',
+                          question: exercise['question'] ?? '',
+                          options: List<String>.from(exercise['options'] ?? []),
+                          correctAnswer: exercise['correctAnswer'] ?? '',
+                          explanation: exercise['explanation'] ?? '',
+                        );
+                      }).toList() ??
+                      [],
+                  difficulty: lesson['difficulty'] ?? 'beginner',
+                  audioUrl: lesson['audioUrl'] ?? '',
+                  videoUrl: lesson['videoUrl'] ?? '',
+                  notes: lesson['notes'] ?? '',
+                  duration: lesson['duration'] ?? 30,
+                );
+              }).toList() ??
+              [],
+        );
+      }).toList();
     } catch (e) {
       print('Error getting course levels: $e');
       rethrow;

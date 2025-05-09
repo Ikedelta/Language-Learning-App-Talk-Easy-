@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/auth_service.dart';
 import '../../services/theme_service.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_of_service_screen.dart';
+import 'edit_profile_screen.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -147,7 +151,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: const Text('Edit Profile'),
                       leading: const Icon(Icons.person),
                       onTap: () {
-                        Navigator.pushNamed(context, '/edit-profile');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      title: const Text('Change Password'),
+                      leading: const Icon(Icons.lock),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChangePasswordScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
@@ -167,13 +188,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ListTile(
                       title: const Text('Terms of Service'),
                       onTap: () {
-                        // Navigate to terms of service
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TermsOfServiceScreen(),
+                          ),
+                        );
                       },
                     ),
                     ListTile(
                       title: const Text('Privacy Policy'),
                       onTap: () {
-                        // Navigate to privacy policy
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const PrivacyPolicyScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

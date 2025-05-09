@@ -6,9 +6,12 @@ import 'package:easy_talk/screens/chat/ai_chat_screen.dart';
 import 'package:easy_talk/screens/profile/profile_screen.dart';
 import 'package:easy_talk/screens/settings/settings_screen.dart';
 import 'package:easy_talk/screens/language_courses/language_courses_screen.dart';
+import 'package:easy_talk/screens/language_courses/course_levels_screen.dart';
 import 'package:easy_talk/models/course_level.dart';
 import 'package:easy_talk/services/course_service.dart';
 import 'package:easy_talk/services/course_content_service.dart';
+import 'package:easy_talk/services/course_progress_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,12 +26,16 @@ class _HomeScreenState extends State<HomeScreen>
   final AuthService _authService = AuthService();
   final CourseService _courseService = CourseService();
   final CourseContentService _courseContentService = CourseContentService();
+  final CourseProgressService _progressService = CourseProgressService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   List<CourseLevel> _recentCourses = [];
   List<CourseLevel> _recommendedCourses = [];
+  double _overallProgress = 0.0;
+  int _totalXp = 0;
+  int _currentLevel = 1;
 
   final List<Language> _languages = [
     Language(
@@ -63,38 +70,6 @@ class _HomeScreenState extends State<HomeScreen>
       color: Colors.amber,
       gradient: [Colors.amber.shade400, Colors.amber.shade700],
     ),
-    Language(
-      name: 'Italian',
-      flag: '🇮🇹',
-      level: 'Beginner to Advanced',
-      lessons: 40,
-      color: Colors.green,
-      gradient: [Colors.green.shade400, Colors.green.shade700],
-    ),
-    Language(
-      name: 'Japanese',
-      flag: '🇯🇵',
-      level: 'Beginner to Advanced',
-      lessons: 55,
-      color: Colors.pink,
-      gradient: [Colors.pink.shade400, Colors.pink.shade700],
-    ),
-    Language(
-      name: 'Chinese',
-      flag: '🇨🇳',
-      level: 'Beginner to Advanced',
-      lessons: 60,
-      color: Colors.orange,
-      gradient: [Colors.orange.shade400, Colors.orange.shade700],
-    ),
-    Language(
-      name: 'Korean',
-      flag: '🇰🇷',
-      level: 'Beginner to Advanced',
-      lessons: 45,
-      color: Colors.indigo,
-      gradient: [Colors.indigo.shade400, Colors.indigo.shade700],
-    ),
   ];
 
   @override
@@ -102,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen>
     super.initState();
     _loadUserData();
     _loadCourses();
+    _loadProgress();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
@@ -147,6 +123,40 @@ class _HomeScreenState extends State<HomeScreen>
     } catch (e) {
       print('Error loading courses: $e');
       // Handle error
+    }
+  }
+
+  Future<void> _loadProgress() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Load progress for each language
+        final languages = [
+          'english',
+          'spanish',
+          'french',
+          'german',
+          'japanese'
+        ];
+        double totalProgress = 0.0;
+        int totalXp = 0;
+
+        for (final language in languages) {
+          final progress =
+              await _courseService.getUserProgress(user.uid, language);
+          totalProgress += progress['completionPercentage'] ?? 0.0;
+          totalXp += ((progress['totalScore'] ?? 0) as num).toInt();
+        }
+
+        setState(() {
+          _overallProgress = totalProgress / languages.length;
+          _totalXp = totalXp;
+          final level = (_totalXp ~/ 100) + 1;
+          _currentLevel = level; // Level up every 100 XP
+        });
+      }
+    } catch (e) {
+      print('Error loading progress: $e');
     }
   }
 
@@ -344,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen>
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Level 3',
+                  'Level $_currentLevel',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -355,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           const SizedBox(height: 20),
           LinearProgressIndicator(
-            value: 0.7,
+            value: _overallProgress / 100,
             backgroundColor: Colors.white.withOpacity(0.2),
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
             borderRadius: BorderRadius.circular(10),
@@ -366,13 +376,13 @@ class _HomeScreenState extends State<HomeScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '70% Complete',
+                '${_overallProgress.toStringAsFixed(1)}% Complete',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.white,
                     ),
               ),
               Text(
-                '350 XP',
+                '$_totalXp XP',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -397,7 +407,28 @@ class _HomeScreenState extends State<HomeScreen>
         ),
         TextButton(
           onPressed: () {
-            // TODO: Implement view all
+            if (title == 'Continue Learning') {
+              // Navigate to all enrolled courses
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const LanguageCoursesScreen(
+                    language: 'english',
+                    level: 'all',
+                  ),
+                ),
+              );
+            } else if (title == 'Available Languages') {
+              // Navigate to all available languages
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CourseLevelsScreen(
+                    language: 'all',
+                  ),
+                ),
+              );
+            }
           },
           child: Text(
             'View All',

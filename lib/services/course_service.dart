@@ -1,12 +1,35 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/course_model.dart' as course_model;
+import '../models/model_types.dart' show Exercise, VocabItem, Lesson;
+import '../models/course_level.dart';
 import '../models/language_course.dart';
-import 'package:easy_talk/models/course_level.dart';
 import 'package:uuid/uuid.dart';
 import '../data/english_courses.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:easy_talk/services/logger_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../utils/logger.dart';
+import '../utils/model_converters.dart';
+import '../config/api_config.dart';
+
+extension StringExtension on String {
+  String capitalize() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  }
+}
 
 class CourseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _uuid = const Uuid();
+
+  CourseService() {
+    AppLogger.info('Initializing CourseService with API key: ${ApiConfig.isGeminiConfigured ? 'PRESENT' : 'EMPTY'}');
+    if (!ApiConfig.isGeminiConfigured) {
+      AppLogger.error('API key is empty. Please check your .env file.');
+    }
+  }
 
   // Initialize courses in Firestore
   Future<void> initializeCourses() async {
@@ -14,93 +37,153 @@ class CourseService {
       // Check if courses already exist
       final coursesSnapshot = await _firestore.collection('courses').get();
       if (coursesSnapshot.docs.isNotEmpty) {
+        AppLogger.info('Courses already initialized: ${coursesSnapshot.docs.length} courses found');
         return; // Courses already initialized
       }
 
+      AppLogger.info('No courses found, initializing default courses');
       // Add English courses
       for (final course in englishCourses) {
         await _firestore
             .collection('courses')
             .doc(course.id)
             .set(course.toJson());
+        AppLogger.info('Added course: ${course.id}');
       }
     } catch (e) {
-      print('Error initializing courses: $e');
+      AppLogger.error('Error initializing courses', e);
       rethrow;
     }
   }
 
-  Stream<List<CourseLevel>> getCoursesByLanguage(String language) {
+  // Stream course levels for a language
+  Stream<List<CourseLevel>> watchCourseLevelsByLanguage(String language) {
     try {
+      AppLogger.info('Starting to watch courses for language: ${language.toLowerCase()}');
+      
+      // First check if we have any courses
+      _firestore.collection('courses').get().then((snapshot) {
+        AppLogger.info('Total courses in Firestore: ${snapshot.docs.length}');
+        if (snapshot.docs.isEmpty) {
+          // Initialize sample courses if none exist
+          initializeCourses().then((_) {
+            AppLogger.info('Initialized sample courses');
+          }).catchError((error) {
+            AppLogger.error('Failed to initialize courses', error);
+          });
+        }
+      }).catchError((error) {
+        AppLogger.error('Failed to check courses', error);
+      });
+
       return _firestore
           .collection('courses')
           .where('language', isEqualTo: language.toLowerCase())
           .orderBy('level')
           .snapshots()
           .map((snapshot) {
-        return snapshot.docs.map((doc) {
-          final data = doc.data();
+            AppLogger.info('Received snapshot with ${snapshot.docs.length} documents');
+            if (snapshot.docs.isEmpty) {
+              AppLogger.info('No courses found for language: ${language.toLowerCase()}');
+              // Add sample course content for this language
+              addSampleCourseContent(language).then((_) {
+                AppLogger.info('Added sample courses for $language');
+              }).catchError((error) {
+                AppLogger.error('Failed to add sample courses', error);
+              });
+            }
+            return snapshot.docs.map((doc) {
+              final data = doc.data();
+              AppLogger.info('Processing document ${doc.id}: ${data['title']}');
 
-          // Handle both CourseLevel and LanguageCourse data structures
-          final level = data['level'];
-          final int levelNumber = level is int
-              ? level
-              : level is String
-                  ? _getLevelNumber(level)
-                  : 1;
+              // Convert the level string to a number
+              final levelStr = (data['level'] as String? ?? 'beginner').toLowerCase();
+              int levelNumber;
+              switch (levelStr) {
+                case 'beginner':
+                  levelNumber = 1;
+                  break;
+                case 'intermediate':
+                  levelNumber = 2;
+                  break;
+                case 'advanced':
+                  levelNumber = 3;
+                  break;
+                default:
+                  levelNumber = 1;
+              }
 
-          return CourseLevel(
-            id: doc.id,
-            name: data['title'] ?? data['name'] ?? '',
-            description: data['description'] ?? '',
-            level: levelNumber,
-            language: data['language'] ?? '',
-            imageUrl: data['imageUrl'] ?? '',
-            isLocked: data['isLocked'] ?? true,
-            requiredXp: data['requiredXp'] ?? 0,
-            lessons: (data['lessons'] as List?)?.map((lesson) {
-                  return Lesson(
-                    id: lesson['id'] ?? '',
-                    title: lesson['title'] ?? '',
-                    description: lesson['description'] ?? '',
-                    vocabulary: List<String>.from(lesson['vocabulary'] ?? []),
-                    grammarPoints:
-                        List<String>.from(lesson['grammarPoints'] ?? []),
-                    exercises: (lesson['exercises'] as List?)?.map((exercise) {
-                          if (exercise is String) {
-                            return Exercise(
-                              id: const Uuid().v4(),
-                              type: 'text',
-                              question: exercise,
-                              options: [],
-                              correctAnswer: '',
-                              explanation: '',
-                            );
-                          }
-                          return Exercise(
-                            id: exercise['id'] ?? '',
-                            type: exercise['type'] ?? '',
-                            question: exercise['question'] ?? '',
-                            options:
-                                List<String>.from(exercise['options'] ?? []),
-                            correctAnswer: exercise['correctAnswer'] ?? '',
-                            explanation: exercise['explanation'] ?? '',
-                          );
-                        }).toList() ??
-                        [],
-                    duration: lesson['duration'] ?? 30,
-                    difficulty: lesson['difficulty'] ?? 'beginner',
-                    audioUrl: lesson['audioUrl'] ?? '',
-                    videoUrl: lesson['videoUrl'] ?? '',
-                    notes: lesson['notes'] ?? '',
+              AppLogger.info('Converting level "$levelStr" to number: $levelNumber');
+
+              // Convert exercises to the CourseLevel format
+              final exercises = (data['exercises'] as List? ?? []).map((exercise) {
+                return Exercise(
+                  id: exercise['id'] ?? _uuid.v4(),
+                  type: exercise['type'] ?? 'multiple_choice',
+                  question: exercise['question'] ?? '',
+                  options: List<String>.from(exercise['options'] ?? []),
+                  correctAnswer: exercise['correctAnswer'] ?? '',
+                  explanation: exercise['explanation'] ?? '',
+                  answer: exercise['answer'] ?? exercise['correctAnswer'] ?? '',
+                );
+              }).toList();
+
+              AppLogger.info('Converted ${exercises.length} exercises');
+
+              // Convert vocabulary to VocabItem objects
+              final vocabulary = (data['vocabulary'] as List? ?? []).map((item) {
+                if (item is String) {
+                  return VocabItem(
+                    word: item,
+                    translation: '', // Default empty translation
+                    pronunciation: '', // Default empty pronunciation
                   );
-                }).toList() ??
-                [],
-          );
-        }).toList();
-      });
-    } catch (e) {
-      print('Error in getCoursesByLanguage: $e');
+                }
+                return VocabItem(
+                  word: item['word'] as String? ?? '',
+                  translation: item['translation'] as String? ?? '',
+                  pronunciation: item['pronunciation'] as String? ?? '',
+                );
+              }).toList();
+
+              // Create a lesson from the course data
+              final lesson = Lesson(
+                id: doc.id,
+                title: data['title'] ?? '',
+                description: data['description'] ?? '',
+                vocabulary: vocabulary,
+                grammarPoints: (data['grammarPoints'] as List? ?? [])
+                    .map((point) => point is String ? point : point['title'] as String)
+                    .toList(),
+                exercises: exercises,
+                duration: 30, // Default duration
+                difficulty: levelStr,
+                audioUrl: data['audioUrl'] ?? '',
+                videoUrl: data['videoUrl'] ?? '',
+                notes: '',
+              );
+
+              AppLogger.info('Created lesson with ${lesson.vocabulary.length} vocabulary items and ${lesson.grammarPoints.length} grammar points');
+
+              return CourseLevel(
+                id: doc.id,
+                name: data['title'] ?? '',
+                description: data['description'] ?? '',
+                level: levelNumber,
+                language: data['language'] ?? '',
+                imageUrl: 'assets/images/${levelStr}_${language.toLowerCase()}.png',
+                isLocked: false,
+                requiredXp: levelNumber == 1 ? 0 : (levelNumber - 1) * 100,
+                lessons: [lesson],
+              );
+            }).toList();
+          })
+          .handleError((error) {
+            AppLogger.error('Error in course stream', error);
+            return [];
+          });
+    } catch (e, stackTrace) {
+      AppLogger.error('Error in watchCourseLevelsByLanguage', e, stackTrace);
       return Stream.value([]);
     }
   }
@@ -176,42 +259,27 @@ class CourseService {
                   id: lesson['id'] ?? '',
                   title: lesson['title'] ?? '',
                   description: lesson['description'] ?? '',
-                  vocabulary: List<String>.from(lesson['vocabulary'] ?? []),
-                  grammarPoints:
-                      List<String>.from(lesson['grammarPoints'] ?? []),
-                  exercises: (lesson['exercises'] as List?)?.map((exercise) {
-                        if (exercise is String) {
-                          return Exercise(
-                            id: const Uuid().v4(),
-                            type: 'text',
-                            question: exercise,
-                            options: [],
-                            correctAnswer: '',
-                            explanation: '',
-                          );
-                        }
-                        return Exercise(
-                          id: exercise['id'] ?? '',
-                          type: exercise['type'] ?? '',
-                          question: exercise['question'] ?? '',
-                          options: List<String>.from(exercise['options'] ?? []),
-                          correctAnswer: exercise['correctAnswer'] ?? '',
-                          explanation: exercise['explanation'] ?? '',
-                        );
-                      }).toList() ??
-                      [],
-                  difficulty: lesson['difficulty'] ?? 'beginner',
+                  vocabulary: (lesson['vocabulary'] as List?)?.map((item) {
+                    if (item is String) {
+                      return VocabItem(
+                        word: item,
+                        translation: '',
+                        pronunciation: '',
+                      );
+                    }
+                    return VocabItem.fromJson(item as Map<String, dynamic>);
+                  }).toList() ?? [],
+                  grammarPoints: List<String>.from(lesson['grammarPoints'] ?? []),
+                  exercises: (lesson['exercises'] as List?)?.map((e) => Exercise.fromJson(e as Map<String, dynamic>)).toList() ?? [],
                   audioUrl: lesson['audioUrl'] ?? '',
                   videoUrl: lesson['videoUrl'] ?? '',
                   notes: lesson['notes'] ?? '',
-                  duration: lesson['duration'] ?? 30,
                 );
-              }).toList() ??
-              [],
+              }).toList() ?? [],
         );
       }).toList();
     } catch (e) {
-      print('Error getting course levels: $e');
+      AppLogger.error('Error in getCourseLevels', e);
       rethrow;
     }
   }
@@ -235,7 +303,7 @@ class CourseService {
   }
 
   // Get a specific lesson
-  Future<Lesson?> getLesson(
+  Future<course_model.Lesson?> getLesson(
       String language, String levelId, String lessonId) async {
     try {
       final doc = await _firestore
@@ -248,7 +316,7 @@ class CourseService {
           .get();
 
       if (!doc.exists) return null;
-      return Lesson.fromJson(doc.data()!);
+      return course_model.Lesson.fromJson(doc.data()!);
     } catch (e) {
       print('Error getting lesson: $e');
       rethrow;
@@ -448,126 +516,445 @@ class CourseService {
   // Add sample course content (for development)
   Future<void> addSampleCourseContent(String language) async {
     try {
-      final batch = _firestore.batch();
+      // Check if courses already exist for this language
+      final coursesSnapshot = await _firestore
+          .collection('courses')
+          .where('language', isEqualTo: language.toLowerCase())
+          .get();
 
-      // Add Beginner Level
-      final beginnerLevel = CourseLevel(
-        id: _uuid.v4(),
-        name: 'Beginner',
-        description: 'Start your journey with basic vocabulary and grammar',
-        level: 1,
-        language: language,
-        imageUrl: 'assets/images/beginner_$language.png',
-        isLocked: false,
-        lessons: [
-          Lesson(
-            id: _uuid.v4(),
-            title: 'Greetings and Introductions',
-            description: 'Learn how to greet people and introduce yourself',
-            vocabulary: ['Hello', 'Goodbye', 'Thank you', 'Please'],
-            grammarPoints: ['Basic sentence structure', 'Present tense'],
-            exercises: [
-              Exercise(
-                id: _uuid.v4(),
-                type: 'multiple_choice',
-                question: 'How do you say "Hello" in $language?',
-                options: ['Option 1', 'Option 2', 'Option 3', 'Option 4'],
-                correctAnswer: 'Option 1',
-                explanation: 'The correct way to say hello is...',
-              ),
-            ],
-            duration: 30,
-            difficulty: 'Beginner',
-          ),
-        ],
-      );
-
-      // Add Intermediate Level
-      final intermediateLevel = CourseLevel(
-        id: _uuid.v4(),
-        name: 'Intermediate',
-        description: 'Build on your foundation with more complex topics',
-        level: 2,
-        language: language,
-        imageUrl: 'assets/images/intermediate_$language.png',
-        requiredXp: 100,
-        lessons: [
-          Lesson(
-            id: _uuid.v4(),
-            title: 'Past Tense',
-            description: 'Learn how to talk about past events',
-            vocabulary: ['Yesterday', 'Last week', 'Before', 'After'],
-            grammarPoints: ['Past tense conjugation', 'Time expressions'],
-            exercises: [
-              Exercise(
-                id: _uuid.v4(),
-                type: 'fill_blank',
-                question:
-                    'Complete the sentence: "I ___ to the store yesterday."',
-                options: ['went', 'go', 'going', 'gone'],
-                correctAnswer: 'went',
-                explanation: 'The past tense of "go" is "went"',
-              ),
-            ],
-            duration: 45,
-            difficulty: 'Intermediate',
-          ),
-        ],
-      );
-
-      // Add Advanced Level
-      final advancedLevel = CourseLevel(
-        id: _uuid.v4(),
-        name: 'Advanced',
-        description: 'Master complex grammar and idiomatic expressions',
-        level: 3,
-        language: language,
-        imageUrl: 'assets/images/advanced_$language.png',
-        requiredXp: 300,
-        lessons: [
-          Lesson(
-            id: _uuid.v4(),
-            title: 'Idiomatic Expressions',
-            description: 'Learn common idioms and their usage',
-            vocabulary: ['Break a leg', 'Piece of cake', 'Hit the road'],
-            grammarPoints: ['Idiomatic usage', 'Context clues'],
-            exercises: [
-              Exercise(
-                id: _uuid.v4(),
-                type: 'translation',
-                question: 'Translate: "It\'s raining cats and dogs"',
-                options: ['Literal translation', 'Idiomatic translation'],
-                correctAnswer: 'Idiomatic translation',
-                explanation: 'This idiom means it\'s raining heavily',
-              ),
-            ],
-            duration: 60,
-            difficulty: 'Advanced',
-          ),
-        ],
-      );
-
-      // Add levels to Firestore
-      final levels = [beginnerLevel, intermediateLevel, advancedLevel];
-      for (var level in levels) {
-        final levelRef = _firestore
-            .collection('courses')
-            .doc(language.toLowerCase())
-            .collection('levels')
-            .doc(level.id);
-
-        batch.set(levelRef, level.toJson());
-
-        // Add lessons
-        for (var lesson in level.lessons) {
-          final lessonRef = levelRef.collection('lessons').doc(lesson.id);
-          batch.set(lessonRef, lesson.toJson());
-        }
+      if (coursesSnapshot.docs.isNotEmpty) {
+        return; // Courses already exist for this language
       }
 
+      // Create sample courses
+      final courses = [
+        course_model.Course(
+          id: _uuid.v4(),
+          name: 'Beginner ${language}',
+          title: 'Beginner ${language}',
+          description: 'Start your journey with basic vocabulary and grammar',
+          language: language.toLowerCase(),
+          level: 'beginner',
+          userId: 'system',
+          createdAt: DateTime.now(),
+          lessons: [
+            course_model.Lesson(
+              id: _uuid.v4(),
+              title: 'Basic Greetings',
+              description: 'Learn essential greetings and introductions',
+              vocabulary: [
+                course_model.VocabItem(
+                  word: 'Hello',
+                  translation: 'Basic greeting',
+                  pronunciation: 'heh-loh',
+                ),
+                course_model.VocabItem(
+                  word: 'Goodbye',
+                  translation: 'Basic farewell',
+                  pronunciation: 'good-bahy',
+                ),
+              ],
+              dialogue: 'A: Hello!\nB: Hi, how are you?\nA: I am fine, thank you!',
+              grammarPoints: ['Basic sentence structure', 'Formal vs informal greetings'],
+              exercises: [
+                course_model.Exercise(
+                  id: _uuid.v4(),
+                  type: 'multiple_choice',
+                  question: 'How do you say "Hello"?',
+                  options: ['Hi', 'Goodbye', 'Thank you', 'Please'],
+                  correctAnswer: 'Hi',
+                  explanation: 'Hi is another way to say Hello',
+                  answer: 'Hi',
+                ),
+              ],
+            ),
+          ],
+        ),
+        course_model.Course(
+          id: _uuid.v4(),
+          name: 'Intermediate ${language}',
+          title: 'Intermediate ${language}',
+          description: 'Advance your language skills with more complex topics',
+          language: language.toLowerCase(),
+          level: 'intermediate',
+          userId: 'system',
+          createdAt: DateTime.now(),
+          lessons: [
+            course_model.Lesson(
+              id: _uuid.v4(),
+              title: 'Advanced Conversation',
+              description: 'Master complex conversation patterns',
+              vocabulary: [
+                course_model.VocabItem(
+                  word: 'Nevertheless',
+                  translation: 'However/Despite that',
+                  pronunciation: 'nev-er-thuh-les',
+                ),
+              ],
+              dialogue: 'A: The weather is bad. Nevertheless, shall we go for a walk?\nB: Yes, let\'s take umbrellas.',
+              grammarPoints: ['Past tense usage', 'Complex sentence structure'],
+              exercises: [
+                course_model.Exercise(
+                  id: _uuid.v4(),
+                  type: 'fill_blank',
+                  question: 'Yesterday, I ____ to the store.',
+                  options: ['go', 'went', 'going', 'goes'],
+                  correctAnswer: 'went',
+                  explanation: 'Use went for past tense of go',
+                  answer: 'went',
+                ),
+              ],
+            ),
+          ],
+        ),
+        course_model.Course(
+          id: _uuid.v4(),
+          name: 'Advanced ${language}',
+          title: 'Advanced ${language}',
+          description: 'Master complex grammar and idiomatic expressions',
+          language: language.toLowerCase(),
+          level: 'advanced',
+          userId: 'system',
+          createdAt: DateTime.now(),
+          lessons: [
+            course_model.Lesson(
+              id: _uuid.v4(),
+              title: 'Idiomatic Expressions',
+              description: 'Learn common idiomatic expressions',
+              vocabulary: [
+                course_model.VocabItem(
+                  word: 'Serendipity',
+                  translation: 'A happy accident',
+                  pronunciation: 'ser-uhn-dip-i-tee',
+                ),
+              ],
+              dialogue: 'A: Finding this book was pure serendipity!\nB: Yes, what a lucky coincidence!',
+              grammarPoints: ['Subjunctive mood', 'Conditional sentences'],
+              exercises: [
+                course_model.Exercise(
+                  id: _uuid.v4(),
+                  type: 'multiple_choice',
+                  question: 'Which is the correct subjunctive form?',
+                  options: ['If I was', 'If I were', 'If I be', 'If I am'],
+                  correctAnswer: 'If I were',
+                  explanation: 'Use were in the subjunctive mood',
+                  answer: 'If I were',
+                ),
+              ],
+            ),
+          ],
+        ),
+      ];
+
+      // Save all courses to Firestore
+      final batch = _firestore.batch();
+      for (var course in courses) {
+        final courseRef = _firestore.collection('courses').doc(course.id);
+        batch.set(courseRef, course.toJson());
+      }
       await batch.commit();
+
     } catch (e) {
-      print('Error adding sample course content: $e');
+      AppLogger.error('Error adding sample course content', e);
+      rethrow;
+    }
+  }
+
+  Future<course_model.Course> generateCourse({
+    required String userId,
+    required String language,
+    required String level,
+  }) async {
+    try {
+      AppLogger.info('Starting course generation for $language at $level level');
+      
+      // Check for existing course
+      final hasExisting = await hasExistingCourses(userId, language);
+      if (hasExisting) {
+        AppLogger.info('Found existing course for $language');
+      }
+
+      if (!ApiConfig.isGeminiConfigured) {
+        AppLogger.error('Gemini API key not configured');
+        throw Exception('Gemini API key not configured. Please check your .env file.');
+      }
+
+      final course = await _generateCourseContent(language, level, userId);
+      AppLogger.info('Course generated successfully, saving to Firestore...');
+
+      // Save to Firestore
+      await _firestore.collection('courses').doc(course.id).set(course.toJson());
+      AppLogger.info('Course saved to Firestore with ID: ${course.id}');
+
+      return course;
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to generate course', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<void> _saveCourseToFirestore(course_model.Course course) async {
+    try {
+      await _firestore.collection('courses').doc(course.id).set(course.toJson());
+    } catch (e, stackTrace) {
+      AppLogger.error('Error saving course to Firestore', e, stackTrace);
+      // Don't rethrow - we still want to return the course even if saving fails
+    }
+  }
+
+  // Fetch courses by language
+  Future<List<course_model.Course>> fetchCoursesByLanguage(String language) async {
+    try {
+      AppLogger.info('Fetching courses for language: ${language.toLowerCase()}');
+      
+      final snapshot = await _firestore
+          .collection('courses')
+          .where('language', isEqualTo: language.toLowerCase())
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      AppLogger.info('Found ${snapshot.docs.length} courses for language: $language');
+      
+      final courses = snapshot.docs
+          .map((doc) => course_model.Course.fromJson(doc.data()))
+          .toList();
+
+      AppLogger.info('Successfully converted ${courses.length} courses from Firestore');
+      return courses;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error fetching courses by language', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<List<course_model.Course>> getCoursesByLevel(String level) async {
+    try {
+      final snapshot = await _firestore
+          .collection('courses')
+          .where('level', isEqualTo: level)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => course_model.Course.fromJson(doc.data()))
+          .toList();
+    } catch (e, stackTrace) {
+      AppLogger.error('Error fetching courses', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  Future<course_model.Course?> getCourseById(String courseId) async {
+    try {
+      final doc = await _firestore
+          .collection('courses')
+          .doc(courseId)
+          .get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return course_model.Course.fromJson(doc.data()!);
+    } catch (e, stackTrace) {
+      AppLogger.error('Error fetching course', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  // Check if user has existing courses
+  Future<bool> hasExistingCourses(String userId, String language) async {
+    try {
+      final snapshot = await _firestore
+          .collection('courses')
+          .where('userId', isEqualTo: userId)
+          .where('language', isEqualTo: language.toLowerCase())
+          .get();
+      
+      return snapshot.docs.isNotEmpty;
+    } catch (e) {
+      AppLogger.error('Error checking existing courses', e);
+      rethrow;
+    }
+  }
+
+  // Get user's courses
+  Stream<List<course_model.Course>> watchUserCourses(String userId) {
+    try {
+      return _firestore
+          .collection('courses')
+          .where('userId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => course_model.Course.fromJson(doc.data()))
+              .toList());
+    } catch (e) {
+      AppLogger.error('Error watching user courses', e);
+      return Stream.value([]);
+    }
+  }
+
+  // Get a specific course
+  Future<course_model.Course?> getCourse(String courseId) async {
+    try {
+      final doc = await _firestore.collection('courses').doc(courseId).get();
+      if (!doc.exists) return null;
+      return course_model.Course.fromJson(doc.data()!);
+    } catch (e) {
+      AppLogger.error('Error getting course', e);
+      rethrow;
+    }
+  }
+
+  Future<bool> hasExistingCourse(String userId, String language) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('courses')
+          .where('userId', isEqualTo: userId)
+          .where('language', isEqualTo: language.toLowerCase())
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      AppLogger.error('Error checking existing course', e);
+      rethrow;
+    }
+  }
+
+  // Convert Course to CourseLevel
+  CourseLevel _convertToCourseLevel(course_model.Course course) {
+    return CourseLevel(
+      id: course.id,
+      name: course.name,
+      description: course.description,
+      level: _getLevelNumber(course.level),
+      language: course.language,
+      imageUrl: 'assets/images/${course.level.toLowerCase()}_${course.language.toLowerCase()}.png',
+      isLocked: false,
+      requiredXp: _getLevelNumber(course.level) == 1 ? 0 : (_getLevelNumber(course.level) - 1) * 100,
+      lessons: course.lessons.map((lesson) => Lesson(
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        vocabulary: lesson.vocabulary.map((word) => VocabItem(
+          word: word.word,
+          translation: word.translation,
+          pronunciation: word.pronunciation,
+        )).toList(),
+        grammarPoints: lesson.grammarPoints,
+        exercises: lesson.exercises.map((ex) => Exercise(
+          id: ex.id,
+          type: ex.type,
+          question: ex.question,
+          options: ex.options,
+          correctAnswer: ex.correctAnswer,
+          explanation: ex.explanation,
+          answer: ex.answer ?? ex.correctAnswer,
+        )).toList(),
+        duration: lesson.duration,
+        difficulty: lesson.difficulty,
+        notes: lesson.notes,
+        audioUrl: lesson.audioUrl,
+        videoUrl: lesson.videoUrl,
+      )).toList(),
+    );
+  }
+
+  // Convert CourseLevel to Course
+  course_model.Course _convertToModelCourse(CourseLevel courseLevel) {
+    return course_model.Course(
+      id: courseLevel.id,
+      name: courseLevel.name,
+      title: courseLevel.name,
+      description: courseLevel.description,
+      language: courseLevel.language,
+      level: courseLevel.level.toString(),
+      userId: 'system',
+      createdAt: DateTime.now(),
+      lessons: courseLevel.lessons.map((lesson) => Lesson(
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        vocabulary: lesson.vocabulary.map((word) => VocabItem(
+          word: word.word,
+          translation: '',
+          pronunciation: '',
+        )).toList(),
+        dialogue: '',
+        grammarPoints: lesson.grammarPoints,
+        exercises: lesson.exercises.map((ex) => Exercise(
+          id: ex.id,
+          type: ex.type,
+          question: ex.question,
+          options: ex.options,
+          correctAnswer: ex.correctAnswer,
+          explanation: ex.explanation,
+          answer: ex.answer ?? ex.correctAnswer,
+        )).toList(),
+        duration: lesson.duration,
+        difficulty: lesson.difficulty,
+        notes: lesson.notes,
+        audioUrl: lesson.audioUrl,
+        videoUrl: lesson.videoUrl,
+      )).toList(),
+    );
+  }
+
+  Future<course_model.Course> _generateCourseContent(
+    String language,
+    String level,
+    String userId,
+  ) async {
+    try {
+      AppLogger.info('Generating course content for $language at $level level');
+      
+      // Create a unique ID for the course
+      final courseId = _uuid.v4();
+      
+      // Create a basic course structure
+      final course = course_model.Course(
+        id: courseId,
+        name: '$level ${language.capitalize()} Course',
+        title: '$level ${language.capitalize()} Course',
+        description: 'A personalized $level course for learning ${language.capitalize()}',
+        language: language.toLowerCase(),
+        level: level.toLowerCase(),
+        userId: userId,
+        createdAt: DateTime.now(),
+        lessons: [
+          course_model.Lesson(
+            id: _uuid.v4(),
+            title: 'Introduction to ${language.capitalize()}',
+            description: 'Get started with basic concepts',
+            vocabulary: [
+              course_model.VocabItem(
+                word: 'Hello',
+                translation: 'Basic greeting',
+                pronunciation: 'hello',
+              ),
+            ],
+            dialogue: 'A: Hello!\nB: Hi, how are you?',
+            grammarPoints: ['Basic greetings', 'Simple present tense'],
+            exercises: [
+              course_model.Exercise(
+                id: _uuid.v4(),
+                type: 'multiple_choice',
+                question: 'How do you say "Hello"?',
+                options: ['Hi', 'Goodbye', 'Thank you', 'Please'],
+                correctAnswer: 'Hi',
+                explanation: 'Hi is another way to say Hello',
+                answer: 'Hi',
+              ),
+            ],
+          ),
+        ],
+      );
+
+      AppLogger.info('Generated course with ID: ${course.id}');
+      return course;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error generating course content', e, stackTrace);
       rethrow;
     }
   }

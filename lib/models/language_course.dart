@@ -20,6 +20,28 @@ class LanguageCourse {
     this.prerequisites = const [],
     this.requiredScore = 0,
   });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'level': level,
+    'imageUrl': imageUrl,
+    'language': language,
+    'lessons': lessons.map((lesson) => lesson.toJson()).toList(),
+  };
+
+  factory LanguageCourse.fromJson(Map<String, dynamic> json) => LanguageCourse(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    level: json['level'] as String,
+    imageUrl: json['imageUrl'] as String,
+    language: json['language'] as String,
+    lessons: (json['lessons'] as List?)
+        ?.map((lesson) => CourseLesson.fromJson(lesson as Map<String, dynamic>))
+        .toList() ?? [],
+  );
 }
 
 class CourseLesson {
@@ -44,4 +66,28 @@ class CourseLesson {
     required this.videoUrl,
     required this.notes,
   });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'vocabulary': vocabulary,
+    'grammarPoints': grammarPoints,
+    'exercises': exercises,
+    'audioUrl': audioUrl,
+    'videoUrl': videoUrl,
+    'notes': notes,
+  };
+
+  factory CourseLesson.fromJson(Map<String, dynamic> json) => CourseLesson(
+    id: json['id'] as String,
+    title: json['title'] as String,
+    description: json['description'] as String,
+    vocabulary: List<String>.from(json['vocabulary'] ?? []),
+    grammarPoints: List<String>.from(json['grammarPoints'] ?? []),
+    exercises: List<String>.from(json['exercises'] ?? []),
+    audioUrl: json['audioUrl'] as String? ?? '',
+    videoUrl: json['videoUrl'] as String? ?? '',
+    notes: json['notes'] as String? ?? '',
+  );
 }

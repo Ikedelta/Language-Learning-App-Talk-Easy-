@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();  // Simplified configuration
   late SharedPreferences _prefs;
 
   AuthService() {
@@ -111,16 +111,37 @@ class AuthService {
   // Sign in with Google
   Future<UserCredential> signInWithGoogle() async {
     try {
+      Logger.debug('Starting Google Sign In process...');
+      
+      // Clear any previous sign in state
+      try {
+        await _googleSignIn.signOut();
+        Logger.debug('Successfully signed out from previous session');
+      } catch (e) {
+        Logger.debug('No previous session to sign out from: $e');
+      }
+      
       // Trigger the authentication flow
+      Logger.debug('Triggering Google Sign In flow...');
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser == null) {
-        throw Exception('Google sign in aborted');
+        Logger.error('Google Sign In was aborted by user');
+        throw Exception('Sign in aborted');
       }
 
+      Logger.debug('Successfully got Google Sign In account: ${googleUser.email}');
+
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      Logger.debug('Getting Google auth details...');
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        Logger.error('Failed to get Google auth tokens');
+        throw Exception('Failed to get auth tokens');
+      }
+
+      Logger.debug('Successfully got Google auth tokens');
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -128,22 +149,54 @@ class AuthService {
         idToken: googleAuth.idToken,
       );
 
-      // Sign in to Firebase with the Google credential
-      final userCredential = await _auth.signInWithCredential(credential);
+      try {
+        Logger.debug('Attempting to sign in to Firebase...');
+        // Sign in to Firebase with the Google credential
+        final userCredential = await _auth.signInWithCredential(credential);
 
-      // Create or update user document in Firestore
-      if (userCredential.user != null) {
-        await _createOrUpdateUserDocument(userCredential.user!);
+        Logger.debug('Successfully signed in to Firebase');
 
-        // Save auth state
-        await _prefs.setBool('isLoggedIn', true);
-        await _prefs.setString('userId', userCredential.user!.uid);
+        // Create or update user document in Firestore
+        if (userCredential.user != null) {
+          await _createOrUpdateUserDocument(userCredential.user!);
+          Logger.debug('Successfully updated user document in Firestore');
+
+          // Save auth state
+          await _prefs.setBool('isLoggedIn', true);
+          await _prefs.setString('userId', userCredential.user!.uid);
+          Logger.debug('Successfully saved auth state');
+        }
+
+        return userCredential;
+      } on FirebaseAuthException catch (e) {
+        Logger.error('Firebase Auth Error', e);
+        String message = 'An error occurred during sign in';
+        
+        switch (e.code) {
+          case 'account-exists-with-different-credential':
+            message = 'An account already exists with a different sign-in method';
+            break;
+          case 'invalid-credential':
+            message = 'The credential is malformed or expired';
+            break;
+          case 'operation-not-allowed':
+            message = 'Google sign-in is not enabled for this project';
+            break;
+          case 'user-disabled':
+            message = 'This user account has been disabled';
+            break;
+          case 'user-not-found':
+            message = 'No user found for this credential';
+            break;
+        }
+        throw Exception(message);
       }
-
-      return userCredential;
     } catch (e) {
-      print('Error signing in with Google: $e');
-      rethrow;
+      Logger.error('Google Sign In Error', e);
+      if (e is Exception) {
+        rethrow;
+      }
+      throw Exception('An error occurred during Google Sign In: $e');
     }
   }
 

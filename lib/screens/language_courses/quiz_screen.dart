@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/course_level.dart';
 import '../../services/course_service.dart';
 import '../../services/auth_service.dart';
+import '../../models/model_types.dart';
 
 class QuizScreen extends StatefulWidget {
   final String lessonId;

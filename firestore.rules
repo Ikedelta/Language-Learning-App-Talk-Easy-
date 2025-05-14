@@ -10,6 +10,12 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
+    // Courses collection rules
+    match /courses/{courseId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
     // Users collection rules
     match /users/{userId} {
       allow read: if isAuthenticated();

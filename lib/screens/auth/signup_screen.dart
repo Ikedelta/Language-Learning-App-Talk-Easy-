@@ -127,9 +127,19 @@ class _SignupScreenState extends State<SignupScreen> {
     } catch (e, stackTrace) {
       Logger.error('Google Sign In Error', e, stackTrace);
       if (mounted) {
+        String errorMessage = 'An error occurred during Google Sign-In';
+        
+        if (e.toString().contains('network_error')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (e.toString().contains('sign_in_failed')) {
+          errorMessage = 'Sign-in failed. Please try again or use a different sign-in method.';
+        } else if (e.toString().contains('sign_in_canceled')) {
+          errorMessage = 'Sign-in was canceled.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error signing in with Google: ${e.toString()}'),
+            content: Text(errorMessage),
             duration: const Duration(seconds: 5),
           ),
         );

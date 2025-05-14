@@ -1,4 +1,5 @@
 import '../models/course_level.dart';
+import '../models/model_types.dart';
 
 final List<CourseLevel> englishCourses = [
   CourseLevel(
@@ -18,20 +19,76 @@ final List<CourseLevel> englishCourses = [
           description:
               'Learn how to greet people and introduce yourself in English.',
           vocabulary: [
-            'Hello',
-            'Hi',
-            'Good morning',
-            'Good afternoon',
-            'Good evening',
-            'How are you?',
-            'I\'m fine, thank you',
-            'Nice to meet you',
-            'My name is...',
-            'What\'s your name?',
-            'Where are you from?',
-            'I\'m from...',
-            'Pleased to meet you',
-            'See you later'
+            VocabItem(
+              word: 'Hello',
+              translation: 'Hola',
+              pronunciation: 'həˈləʊ',
+            ),
+            VocabItem(
+              word: 'Hi',
+              translation: 'Hola',
+              pronunciation: 'haɪ',
+            ),
+            VocabItem(
+              word: 'Good morning',
+              translation: 'Buenos días',
+              pronunciation: 'ɡʊd ˈmɔːnɪŋ',
+            ),
+            VocabItem(
+              word: 'Good afternoon',
+              translation: 'Buenas tardes',
+              pronunciation: 'ɡʊd ˌɑːftəˈnuːn',
+            ),
+            VocabItem(
+              word: 'Good evening',
+              translation: 'Buenas noches',
+              pronunciation: 'ɡʊd ˈiːvnɪŋ',
+            ),
+            VocabItem(
+              word: 'How are you?',
+              translation: '¿Cómo estás?',
+              pronunciation: 'haʊ ɑː juː',
+            ),
+            VocabItem(
+              word: 'I\'m fine, thank you',
+              translation: 'Estoy bien, gracias',
+              pronunciation: 'aɪm faɪn θæŋk juː',
+            ),
+            VocabItem(
+              word: 'Nice to meet you',
+              translation: 'Encantado/a de conocerte',
+              pronunciation: 'naɪs tuː miːt juː',
+            ),
+            VocabItem(
+              word: 'My name is...',
+              translation: 'Mi nombre es...',
+              pronunciation: 'maɪ neɪm ɪz',
+            ),
+            VocabItem(
+              word: 'What\'s your name?',
+              translation: '¿Cómo te llamas?',
+              pronunciation: 'wɒts jɔː neɪm',
+            ),
+            VocabItem(
+              word: 'Where are you from?',
+              translation: '¿De dónde eres?',
+              pronunciation: 'weər ɑː juː frɒm',
+            ),
+            VocabItem(
+              word: 'I\'m from...',
+              translation: 'Soy de...',
+              pronunciation: 'aɪm frɒm',
+            ),
+            VocabItem(
+              word: 'Pleased to meet you',
+              translation: 'Encantado/a de conocerte',
+              pronunciation: 'pliːzd tuː miːt juː',
+            ),
+            VocabItem(
+              word: 'See you later',
+              translation: 'Hasta luego',
+              pronunciation: 'siː juː ˈleɪtə',
+            ),
           ],
           grammarPoints: [
             'Basic sentence structure',
@@ -48,14 +105,16 @@ final List<CourseLevel> englishCourses = [
                 options: ['Good morning', 'Good evening', 'Good night'],
                 correctAnswer: 'Good morning',
                 explanation:
-                    'Good morning is used specifically for morning greetings.'),
+                    'Good morning is used specifically for morning greetings.',
+                answer: 'Good morning'),
             Exercise(
                 id: 'ex_1_1_2',
                 type: 'fill_blank',
                 question: 'Complete the sentence: "___ to meet you."',
                 options: ['Nice', 'Good', 'Happy'],
                 correctAnswer: 'Nice',
-                explanation: 'The correct phrase is "Nice to meet you."'),
+                explanation: 'The correct phrase is "Nice to meet you."',
+                answer: 'Nice'),
             Exercise(
                 id: 'ex_1_1_3',
                 type: 'translation',
@@ -67,7 +126,8 @@ final List<CourseLevel> englishCourses = [
                 ],
                 correctAnswer: '¿Cómo te llamas?',
                 explanation:
-                    'This is the Spanish translation of "What is your name?"')
+                    'This is the Spanish translation of "What is your name?"',
+                answer: '¿Cómo te llamas?')
           ],
           duration: 30,
           difficulty: 'beginner',
@@ -80,24 +140,96 @@ final List<CourseLevel> englishCourses = [
           title: 'Numbers and Colors',
           description: 'Learn to count and name colors in English.',
           vocabulary: [
-            'Numbers 1-20',
-            'Red',
-            'Blue',
-            'Green',
-            'Yellow',
-            'Black',
-            'White',
-            'Orange',
-            'Purple',
-            'Pink',
-            'Brown',
-            'Gray',
-            'Gold',
-            'Silver',
-            'Light',
-            'Dark',
-            'Bright',
-            'Dull'
+            VocabItem(
+              word: 'Numbers 1-20',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Red',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Blue',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Green',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Yellow',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Black',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'White',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Orange',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Purple',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Pink',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Brown',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Gray',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Gold',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Silver',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Light',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Dark',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Bright',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Dull',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Plural forms',
@@ -113,21 +245,24 @@ final List<CourseLevel> englishCourses = [
                 question: 'What is the plural form of "book"?',
                 options: ['books', 'bookes', 'bookies'],
                 correctAnswer: 'books',
-                explanation: 'Most nouns form their plural by adding -s.'),
+                explanation: 'Most nouns form their plural by adding -s.',
+                answer: 'books'),
             Exercise(
                 id: 'ex_1_2_2',
                 type: 'fill_blank',
                 question: 'Complete: "___ are my favorite colors."',
                 options: ['These', 'This', 'That'],
                 correctAnswer: 'These',
-                explanation: 'Use "These" for plural nouns.'),
+                explanation: 'Use "These" for plural nouns.',
+                answer: 'These'),
             Exercise(
                 id: 'ex_1_2_3',
                 type: 'multiple_choice',
                 question: 'Which color is a primary color?',
                 options: ['Red', 'Purple', 'Orange'],
                 correctAnswer: 'Red',
-                explanation: 'Red is one of the three primary colors.')
+                explanation: 'Red is one of the three primary colors.',
+                answer: 'Red')
           ],
           duration: 30,
           difficulty: 'beginner',
@@ -141,23 +276,91 @@ final List<CourseLevel> englishCourses = [
           description:
               'Learn vocabulary and expressions related to family members and relationships.',
           vocabulary: [
-            'Mother',
-            'Father',
-            'Sister',
-            'Brother',
-            'Grandmother',
-            'Grandfather',
-            'Aunt',
-            'Uncle',
-            'Cousin',
-            'Niece',
-            'Nephew',
-            'Sibling',
-            'Parent',
-            'Child',
-            'Spouse',
-            'Husband',
-            'Wife'
+            VocabItem(
+              word: 'Mother',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Father',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Sister',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Brother',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Grandmother',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Grandfather',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Aunt',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Uncle',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Cousin',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Niece',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Nephew',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Sibling',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Parent',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Child',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Spouse',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Husband',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Wife',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Possessive \'s',
@@ -173,7 +376,8 @@ final List<CourseLevel> englishCourses = [
                 question: 'What is the correct possessive form of "mother"?',
                 options: ['mother\'s', 'mothers\'', 'mothers'],
                 correctAnswer: 'mother\'s',
-                explanation: 'Use \'s for singular possessive.'),
+                explanation: 'Use \'s for singular possessive.',
+                answer: 'mother\'s'),
             Exercise(
                 id: 'ex_1_3_2',
                 type: 'fill_blank',
@@ -181,7 +385,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['brother-in-law', 'brother in law', 'brother\'s law'],
                 correctAnswer: 'brother-in-law',
                 explanation:
-                    'The correct term for your sister\'s husband is "brother-in-law".')
+                    'The correct term for your sister\'s husband is "brother-in-law".',
+                answer: 'brother-in-law')
           ],
           duration: 30,
           difficulty: 'beginner',
@@ -208,22 +413,86 @@ final List<CourseLevel> englishCourses = [
           description:
               'Learn to talk about past events and use time expressions correctly.',
           vocabulary: [
-            'Yesterday',
-            'Last week',
-            'Last month',
-            'Last year',
-            'Ago',
-            'Before',
-            'After',
-            'During',
-            'While',
-            'When',
-            'Until',
-            'Since',
-            'For',
-            'In the past',
-            'Previously',
-            'Formerly'
+            VocabItem(
+              word: 'Yesterday',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Last week',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Last month',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Last year',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Ago',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Before',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'After',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'During',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'While',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'When',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Until',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Since',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'For',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'In the past',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Previously',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Formerly',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Past simple tense',
@@ -240,7 +509,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['went', 'goed', 'gone'],
                 correctAnswer: 'went',
                 explanation:
-                    'Go is an irregular verb, and its past tense is "went".'),
+                    'Go is an irregular verb, and its past tense is "went".',
+                answer: 'went'),
             Exercise(
                 id: 'ex_2_1_2',
                 type: 'fill_blank',
@@ -248,7 +518,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['was', 'were', 'am'],
                 correctAnswer: 'was',
                 explanation:
-                    'Use "was" with singular subjects in past continuous.'),
+                    'Use "was" with singular subjects in past continuous.',
+                answer: 'was'),
             Exercise(
                 id: 'ex_2_1_3',
                 type: 'multiple_choice',
@@ -257,7 +528,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['Past perfect', 'Past simple', 'Past continuous'],
                 correctAnswer: 'Past perfect',
                 explanation:
-                    'Past perfect is used for actions that happened before another past action.')
+                    'Past perfect is used for actions that happened before another past action.',
+                answer: 'Past perfect')
           ],
           duration: 45,
           difficulty: 'intermediate',
@@ -270,20 +542,76 @@ final List<CourseLevel> englishCourses = [
           title: 'Future Plans and Predictions',
           description: 'Learn to express future plans and make predictions.',
           vocabulary: [
-            'Will',
-            'Going to',
-            'Plan to',
-            'Intend to',
-            'Hope to',
-            'Expect to',
-            'Predict',
-            'Forecast',
-            'Anticipate',
-            'Schedule',
-            'Arrange',
-            'Book',
-            'Reserve',
-            'Prepare for'
+            VocabItem(
+              word: 'Will',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Going to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Plan to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Intend to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Hope to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Expect to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Predict',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Forecast',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Anticipate',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Schedule',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Arrange',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Book',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Reserve',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Prepare for',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Future simple tense',
@@ -300,7 +628,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['going to', 'will', 'present simple'],
                 correctAnswer: 'going to',
                 explanation:
-                    '\'Going to\' is used for planned future actions.'),
+                    '\'Going to\' is used for planned future actions.',
+                answer: 'going to'),
             Exercise(
                 id: 'ex_2_2_2',
                 type: 'fill_blank',
@@ -312,7 +641,8 @@ final List<CourseLevel> englishCourses = [
                 ],
                 correctAnswer: 'will have completed',
                 explanation:
-                    'Use future perfect for actions that will be completed by a specific time in the future.')
+                    'Use future perfect for actions that will be completed by a specific time in the future.',
+                answer: 'will have completed')
           ],
           duration: 45,
           difficulty: 'intermediate',
@@ -325,21 +655,81 @@ final List<CourseLevel> englishCourses = [
           description:
               'Learn to express possibility, ability, and necessity using modal verbs.',
           vocabulary: [
-            'Can',
-            'Could',
-            'May',
-            'Might',
-            'Must',
-            'Should',
-            'Would',
-            'Ought to',
-            'Have to',
-            'Need to',
-            'Possible',
-            'Impossible',
-            'Necessary',
-            'Optional',
-            'Required'
+            VocabItem(
+              word: 'Can',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Could',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'May',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Might',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Must',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Should',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Would',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Ought to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Have to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Need to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Possible',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Impossible',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Necessary',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Optional',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Required',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Modal verbs for possibility',
@@ -356,14 +746,16 @@ final List<CourseLevel> englishCourses = [
                 options: ['must', 'might', 'could'],
                 correctAnswer: 'must',
                 explanation:
-                    '\'Must\' expresses strong necessity or obligation.'),
+                    '\'Must\' expresses strong necessity or obligation.',
+                answer: 'must'),
             Exercise(
                 id: 'ex_2_3_2',
                 type: 'fill_blank',
                 question: 'Complete: "You ___ study for the exam."',
                 options: ['should', 'can', 'may'],
                 correctAnswer: 'should',
-                explanation: '\'Should\' is used for advice or recommendation.')
+                explanation: '\'Should\' is used for advice or recommendation.',
+                answer: 'should')
           ],
           duration: 45,
           difficulty: 'intermediate',
@@ -390,19 +782,71 @@ final List<CourseLevel> englishCourses = [
           description:
               'Learn to express hypothetical situations and conditions.',
           vocabulary: [
-            'If',
-            'Unless',
-            'Provided that',
-            'In case',
-            'As long as',
-            'Supposing',
-            'Assuming',
-            'Given that',
-            'On condition that',
-            'Hypothetical',
-            'Conditional',
-            'Consequence',
-            'Outcome'
+            VocabItem(
+              word: 'If',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Unless',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Provided that',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'In case',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'As long as',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Supposing',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Assuming',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Given that',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'On condition that',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Hypothetical',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Conditional',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Consequence',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Outcome',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Zero conditional',
@@ -424,7 +868,8 @@ final List<CourseLevel> englishCourses = [
                 ],
                 correctAnswer: 'Second conditional',
                 explanation:
-                    'Second conditional is used for hypothetical or unlikely situations.'),
+                    'Second conditional is used for hypothetical or unlikely situations.',
+                answer: 'Second conditional'),
             Exercise(
                 id: 'ex_3_1_2',
                 type: 'fill_blank',
@@ -433,7 +878,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['were', 'was', 'am'],
                 correctAnswer: 'were',
                 explanation:
-                    'In second conditional, use "were" for all subjects.'),
+                    'In second conditional, use "were" for all subjects.',
+                answer: 'were'),
             Exercise(
                 id: 'ex_3_1_3',
                 type: 'multiple_choice',
@@ -446,7 +892,8 @@ final List<CourseLevel> englishCourses = [
                 ],
                 correctAnswer: 'Third conditional',
                 explanation:
-                    'Third conditional is used for past hypothetical situations.')
+                    'Third conditional is used for past hypothetical situations.',
+                answer: 'Third conditional')
           ],
           duration: 60,
           difficulty: 'advanced',
@@ -460,18 +907,66 @@ final List<CourseLevel> englishCourses = [
           description:
               'Develop skills for academic writing and formal communication.',
           vocabulary: [
-            'Furthermore',
-            'Moreover',
-            'Nevertheless',
-            'Consequently',
-            'In conclusion',
-            'To summarize',
-            'In addition',
-            'However',
-            'Therefore',
-            'Thus',
-            'Hence',
-            'Accordingly'
+            VocabItem(
+              word: 'Furthermore',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Moreover',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Nevertheless',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Consequently',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'In conclusion',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'To summarize',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'In addition',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'However',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Therefore',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Thus',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Hence',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Accordingly',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Passive voice',
@@ -493,7 +988,8 @@ final List<CourseLevel> englishCourses = [
                 ],
                 correctAnswer: 'The project was completed by the team',
                 explanation:
-                    'Use past simple passive for completed actions in the past.'),
+                    'Use past simple passive for completed actions in the past.',
+                answer: 'The project was completed by the team'),
             Exercise(
                 id: 'ex_3_2_2',
                 type: 'fill_blank',
@@ -502,7 +998,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['indicates', 'indicated', 'has indicated'],
                 correctAnswer: 'indicates',
                 explanation:
-                    'Use present simple for general truths in academic writing.')
+                    'Use present simple for general truths in academic writing.',
+                answer: 'indicates')
           ],
           duration: 60,
           difficulty: 'advanced',
@@ -516,18 +1013,66 @@ final List<CourseLevel> englishCourses = [
           description:
               'Master common idioms and phrasal verbs for natural English communication.',
           vocabulary: [
-            'Break a leg',
-            'Piece of cake',
-            'Hit the road',
-            'Get over',
-            'Look forward to',
-            'Put up with',
-            'Come across',
-            'Run into',
-            'Figure out',
-            'Work out',
-            'Give up',
-            'Take up'
+            VocabItem(
+              word: 'Break a leg',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Piece of cake',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Hit the road',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Get over',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Look forward to',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Put up with',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Come across',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Run into',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Figure out',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Work out',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Give up',
+              translation: '',
+              pronunciation: '',
+            ),
+            VocabItem(
+              word: 'Take up',
+              translation: '',
+              pronunciation: '',
+            ),
           ],
           grammarPoints: [
             'Idiomatic usage',
@@ -543,7 +1088,8 @@ final List<CourseLevel> englishCourses = [
                 question: 'What does "break a leg" mean?',
                 options: ['Good luck', 'Bad luck', 'Get injured'],
                 correctAnswer: 'Good luck',
-                explanation: '\'Break a leg\' is an idiom meaning good luck.'),
+                explanation: '\'Break a leg\' is an idiom meaning good luck.',
+                answer: 'Good luck'),
             Exercise(
                 id: 'ex_3_3_2',
                 type: 'fill_blank',
@@ -551,7 +1097,8 @@ final List<CourseLevel> englishCourses = [
                 options: ['figure out', 'figure in', 'figure up'],
                 correctAnswer: 'figure out',
                 explanation:
-                    '\'Figure out\' means to solve or understand something.')
+                    '\'Figure out\' means to solve or understand something.',
+                answer: 'figure out')
           ],
           duration: 60,
           difficulty: 'advanced',

@@ -5,6 +5,8 @@ import '../../services/theme_service.dart';
 import '../../services/course_service.dart';
 import 'course_detail_screen.dart';
 import '../../services/auth_service.dart';
+import '../../providers/course_provider.dart';
+import '../../config/api_config.dart';
 
 class LanguageCoursesScreen extends StatefulWidget {
   final String language;
@@ -24,20 +26,25 @@ class _LanguageCoursesScreenState extends State<LanguageCoursesScreen> {
   final CourseService _courseService = CourseService();
   Map<String, dynamic>? _userProgress;
   bool _isLoading = true;
+  bool _isGenerating = false;
   final AuthService _authService = AuthService();
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _loadUserProgress();
+    _loadCourses();
   }
 
   Future<void> _loadUserProgress() async {
     try {
-      final user = Provider.of<AuthService>(context, listen: false).currentUser;
-      if (user != null) {
-        final progress =
-            await _courseService.getUserProgress(user.uid, widget.language);
+      final userId = _authService.currentUser?.uid;
+      if (userId != null) {
+        final progress = await _courseService.getUserProgress(
+          userId,
+          widget.language,
+        );
         setState(() {
           _userProgress = progress;
           _isLoading = false;
@@ -45,214 +52,185 @@ class _LanguageCoursesScreenState extends State<LanguageCoursesScreen> {
       }
     } catch (e) {
       setState(() {
+        _error = e.toString();
         _isLoading = false;
       });
     }
   }
 
+  Future<void> _loadCourses() async {
+    try {
+      final courseProvider = context.read<CourseProvider>();
+      print('Loading courses for language: ${widget.language}');
+      await courseProvider.loadCoursesByLanguage(widget.language);
+      print('Courses loaded. Total courses: ${courseProvider.courses.length}');
+      
+      if (courseProvider.courses.isEmpty) {
+        print('No courses found. Checking for errors: ${courseProvider.error}');
+      } else {
+        print('First course: ${courseProvider.courses.first.title}');
+      }
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+      });
+      print('Error in _loadCourses: $e');
+    }
+  }
+
+  Future<void> _generateCourse() async {
+    final courseProvider = context.read<CourseProvider>();
+    final userId = _authService.currentUser?.uid;
+    
+    if (userId == null) {
+      setState(() {
+        _error = 'Please sign in to generate courses';
+      });
+      return;
+    }
+
+    setState(() {
+      _isGenerating = true;
+      _error = null;
+    });
+
+    try {
+      print('Generating course for language: ${widget.language}, level: ${widget.level}');
+      print('API Key configured: ${ApiConfig.isGeminiConfigured}');
+      
+      await courseProvider.generateCourse(
+        language: widget.language,
+        level: widget.level,
+        userId: userId,
+      );
+
+      // Reload courses after successful generation
+      await _loadCourses();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Course generated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error generating course: $e');
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate course: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isGenerating = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Provider.of<ThemeService>(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.level == 'all'
-            ? 'All Courses'
-            : '${widget.language} Courses'),
-        backgroundColor: theme.primaryColor,
+        title: Text('${widget.language} Courses - ${widget.level}'),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : StreamBuilder<List<CourseLevel>>(
-              stream: _courseService.getCoursesByLanguage(widget.language),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error loading courses',
-                      style: theme.errorTextStyle,
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final courses = snapshot.data!;
-                if (courses.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No courses available',
-                      style: theme.bodyStyle,
-                    ),
-                  );
-                }
-
-                // Filter courses based on level if not 'all'
-                final filteredCourses = widget.level == 'all'
-                    ? courses
-                    : courses
-                        .where(
-                            (course) => course.level.toString() == widget.level)
-                        .toList();
-
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filteredCourses.length,
-                  itemBuilder: (context, index) {
-                    final course = filteredCourses[index];
-                    final isEnrolled = _userProgress?['enrolledCourses']
-                            ?.contains(course.id) ??
-                        false;
-                    final canEnroll = !course.isLocked &&
-                        (_userProgress?['totalScore'] ?? 0) >=
-                            course.requiredXp;
-
-                    return _buildCourseCard(course);
-                  },
-                );
-              },
-            ),
+      body: _buildBody(),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _isGenerating ? null : _generateCourse,
+        label: Text(_isGenerating ? 'Generating...' : 'Generate with AI'),
+        icon: Icon(_isGenerating ? Icons.hourglass_empty : Icons.auto_awesome),
+      ),
     );
   }
 
-  Widget _buildCourseCard(CourseLevel course) {
-    final isEnrolled =
-        _userProgress?['enrolledCourses']?.contains(course.id) ?? false;
-    final completedLessons =
-        List<String>.from(_userProgress?['completedLessons'] ?? []);
-    final courseLessons = course.lessons;
-    final completedLessonsCount = courseLessons
-        .where((lesson) => completedLessons.contains(lesson.id))
-        .length;
-    final progress = courseLessons.isEmpty
-        ? 0.0
-        : completedLessonsCount / courseLessons.length;
+  Widget _buildBody() {
+    return Consumer<CourseProvider>(
+      builder: (context, courseProvider, child) {
+        if (_isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        course.name,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Level: ${course.level}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                if (isEnrolled)
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      '${(progress * 100).toInt()}% Complete',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              course.description,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        if (_error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${courseLessons.length} Lessons',
-                  style: Theme.of(context).textTheme.bodySmall,
+                  'Error: $_error',
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
                 ),
-                if (!isEnrolled)
-                  Text(
-                    'Required XP: ${course.requiredXp}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      _error = null;
+                      _isLoading = true;
+                    });
+                    _loadCourses();
+                  },
+                  child: const Text('Retry'),
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            if (isEnrolled)
-              LinearProgressIndicator(
-                value: progress,
-                backgroundColor:
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Theme.of(context).colorScheme.primary,
+          );
+        }
+
+        final courses = courseProvider.courses;
+        if (courses.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'No courses available yet',
+                  style: TextStyle(fontSize: 18),
                 ),
-              ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                if (!isEnrolled) {
-                  try {
-                    final user = _authService.currentUser;
-                    if (user != null) {
-                      await _courseService.enrollInCourse(
-                        user.uid,
-                        widget.language,
-                        course.id,
-                      );
-                      await _loadUserProgress();
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Error enrolling in course: $e'),
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
-                    }
-                  }
-                } else {
-                  if (mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CourseDetailScreen(
-                          course: course,
-                          userProgress: _userProgress,
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 48),
-              ),
-              child: Text(isEnrolled ? 'Continue' : 'Enroll'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Click the button below to generate a new course',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: courses.length,
+          itemBuilder: (context, index) {
+            final course = courses[index];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 16),
+              child: ListTile(
+                title: Text(course.name),
+                subtitle: Text(course.description),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CourseDetailScreen(
+                        courseId: course.id,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

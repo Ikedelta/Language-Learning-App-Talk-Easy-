@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:easy_talk/models/course_level.dart';
+import '../../models/model_types.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:video_player/video_player.dart';
 import '../../services/course_progress_service.dart';
@@ -8,11 +8,13 @@ import 'quiz_screen.dart';
 class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
   final String courseId;
+  final String language;
 
   const LessonDetailScreen({
     super.key,
     required this.lesson,
     required this.courseId,
+    required this.language,
   });
 
   @override
@@ -32,11 +34,6 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _videoController = VideoPlayerController.asset(widget.lesson.videoUrl)
-      ..initialize().then((_) {
-        setState(() {});
-      });
-    _setupAudioPlayer();
     _loadProgress();
   }
 
@@ -65,31 +62,10 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     await _progressService.updateCourseProgress(widget.courseId, newProgress);
   }
 
-  void _setupAudioPlayer() {
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (state == PlayerState.completed) {
-        setState(() {
-          _isPlaying = false;
-        });
-      }
-    });
-  }
-
   @override
   void dispose() {
-    _videoController.dispose();
     _audioPlayer.dispose();
     super.dispose();
-  }
-
-  Future<void> _playAudio() async {
-    if (_isPlaying) {
-      await _audioPlayer.stop();
-      setState(() => _isPlaying = false);
-    } else {
-      await _audioPlayer.play(AssetSource(widget.lesson.audioUrl));
-      setState(() => _isPlaying = true);
-    }
   }
 
   @override
@@ -108,48 +84,51 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 24),
-            if (_videoController.value.isInitialized)
-              AspectRatio(
-                aspectRatio: _videoController.value.aspectRatio,
-                child: VideoPlayer(_videoController),
+            if (widget.lesson.dialogue != null) ...[
+              const Text(
+                'Dialogue',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(_videoController.value.isPlaying
-                      ? Icons.pause
-                      : Icons.play_arrow),
-                  onPressed: () {
-                    setState(() {
-                      if (_videoController.value.isPlaying) {
-                        _videoController.pause();
-                      } else {
-                        _videoController.play();
-                      }
-                    });
-                  },
+              const SizedBox(height: 8),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(widget.lesson.dialogue!),
                 ),
-                const SizedBox(width: 16),
-                IconButton(
-                  icon: Icon(_isPlaying ? Icons.stop : Icons.volume_up),
-                  onPressed: _playAudio,
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
+              ),
+              const SizedBox(height: 24),
+            ],
+            const Text(
               'Vocabulary',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: widget.lesson.vocabulary
-                  .map((word) => Chip(label: Text(word)))
-                  .toList(),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: widget.lesson.vocabulary.length,
+              itemBuilder: (context, index) {
+                final vocab = widget.lesson.vocabulary[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    title: Text(vocab.word),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Translation: ${vocab.translation}'),
+                        Text('Pronunciation: ${vocab.pronunciation}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 24),
             Text(
@@ -181,18 +160,21 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
+                _updateProgress(1.0);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => QuizScreen(
                       lessonId: widget.lesson.id,
-                      language:
-                          'english', // You should pass the actual language
+                      language: widget.language,
                       levelId: widget.courseId,
                     ),
                   ),
                 );
               },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 48),
+              ),
               child: const Text('Take Quiz'),
             ),
           ],

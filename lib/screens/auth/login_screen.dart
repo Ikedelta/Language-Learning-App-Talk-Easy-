@@ -70,21 +70,32 @@ class _LoginScreenState extends State<LoginScreen>
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _isLoading = false);
+        
+        String errorMessage = e.toString();
+        // Remove 'Exception: ' prefix if present
+        if (errorMessage.startsWith('Exception: ')) {
+          errorMessage = errorMessage.substring('Exception: '.length);
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error signing in: ${e.toString()}'),
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
             ),
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    }
+    if (mounted) {
+      setState(() => _isLoading = false);
     }
   }
 

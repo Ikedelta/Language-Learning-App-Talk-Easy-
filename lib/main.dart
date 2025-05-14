@@ -3,16 +3,23 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/theme_service.dart';
 import 'services/auth_service.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home/home_screen.dart';
-import 'screens/auth/forgot_password_screen.dart';
-import 'screens/auth/signup_screen.dart';
+import 'providers/course_provider.dart';
+import 'app.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
   await Firebase.initializeApp();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
 
   // Lock orientation to portrait mode
   await SystemChrome.setPreferredOrientations([
@@ -30,8 +37,6 @@ void main() async {
     ),
   );
 
-  final prefs = await SharedPreferences.getInstance();
-
   runApp(
     MultiProvider(
       providers: [
@@ -41,64 +46,11 @@ void main() async {
         Provider<AuthService>(
           create: (_) => AuthService(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => CourseProvider(),
+        ),
       ],
-      child: const MyApp(),
+      child: const App(),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeService = Provider.of<ThemeService>(context);
-    final authService = Provider.of<AuthService>(context);
-
-    return MaterialApp(
-      title: 'Talk Easy',
-      debugShowCheckedModeBanner: false,
-      theme: themeService.lightTheme,
-      darkTheme: themeService.darkTheme,
-      themeMode: themeService.themeMode,
-      home: StreamBuilder(
-        stream: authService.authStateChanges,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: ThemeService.defaultPadding),
-                    Text(
-                      'Loading...',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          if (snapshot.hasData) {
-            return const HomeScreen();
-          }
-
-          return const LoginScreen();
-        },
-      ),
-      routes: {
-        '/login': (context) => const LoginScreen(),
-        '/signup': (context) => const SignupScreen(),
-        '/forgot-password': (context) => const ForgotPasswordScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
-    );
-  }
 }

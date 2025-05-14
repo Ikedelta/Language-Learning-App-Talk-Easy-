@@ -3,20 +3,28 @@ import 'dart:convert';
 import '../models/quiz.dart';
 import '../models/language_course.dart';
 import 'package:uuid/uuid.dart';
+import '../config/api_config.dart';
+import '../utils/logger.dart';
 
 class QuizGenerationService {
   final GenerativeModel _model;
-  static const String _apiKey =
-      'YOUR_GEMINI_API_KEY'; // Replace with your API key
 
   QuizGenerationService()
       : _model = GenerativeModel(
           model: 'gemini-pro',
-          apiKey: _apiKey,
-        );
+          apiKey: ApiConfig.geminiApiKey,
+        ) {
+    if (!ApiConfig.isGeminiConfigured) {
+      AppLogger.error('Gemini API key not configured. Please check your .env file.');
+    }
+  }
 
   Future<Quiz> generateQuizForLesson(
       CourseLesson lesson, String language, String level) async {
+    if (!ApiConfig.isGeminiConfigured) {
+      throw Exception('Gemini API key not configured. Please check your .env file.');
+    }
+
     final prompt = '''
 Generate a quiz for a $language language lesson at $level level.
 Lesson title: ${lesson.title}
@@ -43,31 +51,46 @@ Format the response as JSON with the following structure:
 
     try {
       final response = await _model.generateContent([Content.text(prompt)]);
-      final jsonResponse = response.text ?? '';
+      if (response.text == null) {
+        throw Exception('Failed to generate quiz: Empty response from API');
+      }
 
-      // Parse the JSON response and create a Quiz object
-      final Map<String, dynamic> quizData = json.decode(jsonResponse);
+      final jsonResponse = response.text!;
 
-      return Quiz(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        language: language,
-        level: level,
-        questions: (quizData['questions'] as List)
-            .map((q) => QuizQuestion(
-                  id: q['id'] ?? const Uuid().v4(),
-                  question: q['question'],
-                  options: List<String>.from(q['options']),
-                  correctOptionIndex: q['correctOptionIndex'],
-                  explanation: q['explanation'],
-                  type: q['questionType'],
-                ))
-            .toList(),
-        timeLimit: 10, // 10 minutes
-        passingScore: 70, // 70% passing score
-      );
+      try {
+        // Parse the JSON response and create a Quiz object
+        final Map<String, dynamic> quizData = json.decode(jsonResponse);
+
+        return Quiz(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          language: language,
+          level: level,
+          questions: (quizData['questions'] as List)
+              .map((q) => QuizQuestion(
+                    id: q['id'] ?? const Uuid().v4(),
+                    question: q['question'],
+                    options: List<String>.from(q['options']),
+                    correctOptionIndex: q['correctOptionIndex'],
+                    explanation: q['explanation'],
+                    type: q['questionType'],
+                  ))
+              .toList(),
+          timeLimit: 10, // 10 minutes
+          passingScore: 70, // 70% passing score
+        );
+      } catch (e) {
+        AppLogger.error('Error parsing quiz response', e);
+        throw Exception('Failed to parse quiz data: Invalid format');
+      }
     } catch (e) {
-      print('Error generating quiz: $e');
-      rethrow;
+      AppLogger.error('Error generating quiz', e);
+      if (e.toString().contains('SocketException') || 
+          e.toString().contains('Connection refused') ||
+          e.toString().contains('Connection reset') ||
+          e.toString().contains('Connection closed')) {
+        throw Exception('Unable to connect to the quiz generation service. Please check your internet connection and try again.');
+      }
+      throw Exception('Failed to generate quiz: ${e.toString()}');
     }
   }
 
@@ -83,7 +106,7 @@ Format the response as JSON with the following structure:
         );
         quizzes.add(quiz);
       } catch (e) {
-        print('Error generating quiz for lesson ${lesson.id}: $e');
+        AppLogger.error('Error generating quiz for lesson ${lesson.id}', e);
       }
     }
 

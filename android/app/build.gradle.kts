@@ -61,8 +61,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     
-    // Add explicit Google Sign In dependency
+    // Update Google Play Services dependencies
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.android.gms:play-services-base:18.3.0")
+    implementation("com.google.android.gms:play-services-identity:18.0.1")
     implementation("com.google.android.gms:play-services-auth-api-phone:18.0.1")
     
     // Support for multidex

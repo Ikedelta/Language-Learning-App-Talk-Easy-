@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "427439703133-altscpsj4efkmnoe94mj23h9t4djthcf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.languageapp.easy_talk",
+            "certificate_hash": "3585d22a36b487bef8ba7dd447ffb69ac319b362"
+          }
+        },
+        {
           "client_id": "427439703133-neggbcqa3ugi2fhk0h70ocargbt4v57t.apps.googleusercontent.com",
           "client_type": 3
         }
